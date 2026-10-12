@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body><div id="ksplash" class="wait" role="img" aria-label="Koris" title="Touchez pour passer">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="Koris, l'application de rencontre de la RDC : rencontre des célibataires près de chez toi à Kinshasa, Lubumbashi, Goma, Bukavu et partout au Congo. Profils vérifiés, messages privés, photos et vidéos."><meta name="theme-color" content="#0D0A0E"><link rel="manifest" href="/manifest.webmanifest"><link rel="icon" type="image/png" href="/icon-192.png"><link rel="apple-touch-icon" href="/icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Koris"><link rel="canonical" href="https://koris-rdc.github.io/"><meta property="og:type" content="website"><meta property="og:site_name" content="Koris"><meta property="og:title" content="Koris — Rencontres en RDC"><meta property="og:description" content="Rencontre des célibataires près de chez toi, à Kinshasa, Lubumbashi, Goma et partout au Congo."><meta property="og:url" content="https://koris-rdc.github.io/"><meta property="og:image" content="https://koris-rdc.github.io/icon-512.png"><meta property="og:locale" content="fr_CD"><meta name="twitter:card" content="summary"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body><div id="ksplash" class="wait" role="img" aria-label="Koris" title="Touchez pour passer">
 <style>
 #ksplash{position:fixed;inset:0;z-index:99999;background:#0D0A0E;display:grid;place-items:center;overflow:hidden;cursor:pointer;animation:ksOut .7s cubic-bezier(.7,0,.3,1) 10.4s forwards}
 #ksplash .ks-stage{position:relative;height:100svh;max-height:100%;aspect-ratio:9/16;max-width:100vw;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4.2svh;background:radial-gradient(70% 45% at 50% 44%,rgba(242,65,107,.26),transparent 70%),radial-gradient(60% 40% at 50% 110%,rgba(255,158,122,.14),transparent 70%),#0D0A0E;animation:ksBg 1.6s ease-out both}
@@ -149,7 +149,7 @@ if(!c0||c0.state==='running'){go()}else{
 })();
 </script>
 </div>
-<title>Koris</title>
+<title>Koris — Application de rencontre en RDC (Kinshasa, Lubumbashi, Goma)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Montserrat:wght@300;400;500;600;700;800&display=swap">
 <style>
@@ -1184,7 +1184,7 @@ function vAuth(){const mode=S.authMode||'up';
    <button class="btn btn-primary" id="aGo" type="submit">${mode==='up'?'Créer mon compte':mode==='in'?'Me connecter':'Recevoir le lien'}</button>
   </form>
   ${mode==='in'?`<button type="button" class="lnk-in" data-auth="reset">Mot de passe oublié ?</button>`:mode==='reset'?`<button type="button" class="lnk-in" data-auth="in">Retour à la connexion</button>`:''}
-  <p class="fine">18 ans et plus · Inscription 5&nbsp;000&nbsp;FC, puis 5&nbsp;000&nbsp;FC/mois</p></section>`}
+  <p class="fine">18 ans et plus · Inscription 5&nbsp;000&nbsp;FC, puis 5&nbsp;000&nbsp;FC/mois · <a href="/confidentialite.html" style="color:inherit;text-decoration:underline">Confidentialité</a></p></section>`}
 function authErr(e){const m=String(e?.message||e||'');
   if(/invalid login|invalid credentials/i.test(m))return 'E-mail ou mot de passe incorrect.';
   if(/already registered|already exists/i.test(m))return 'Cet e-mail a déjà un compte : touche « J\'ai un compte ».';
@@ -1349,7 +1349,7 @@ function vOnboard(){
   <div class="wl-dots" id="wlD">${slides.map((_,i)=>`<button data-slide="${i}" class="${i?'':'on'}" aria-label="Diapositive ${i+1}"></button>`).join('')}</div>
   <button class="wl-go" data-go="signup" ${signed?'data-param="fresh"':''}>Commencer</button>
   ${signed?`<button class="lnk-in" data-go="${isActive(me())?'feed':'pay'}">J'ai déjà un compte · <b>Entrer</b></button>`:S.be.mode==='live'?`<button class="lnk-in" data-go="auth" data-param="in">J'ai déjà un compte · <b>Me connecter</b></button>`:''}
-  <p class="fine">18 ans et plus · Inscription 5&nbsp;000&nbsp;FC, puis 5&nbsp;000&nbsp;FC/mois</p>
+  <p class="fine">18 ans et plus · Inscription 5&nbsp;000&nbsp;FC, puis 5&nbsp;000&nbsp;FC/mois · <a href="/confidentialite.html" style="color:inherit;text-decoration:underline">Confidentialité</a></p>
   ${demoBanner()}
   </section>`}
 function initWelcome(){const sc=$('#wlS'),dots=[...document.querySelectorAll('#wlD button')];if(!sc)return null;let idx=0,user=false;
@@ -2103,4 +2103,5 @@ boot();
 <script>
 /* Ouvre directement la galerie : un appui sur une zone photo déclenche le sélecteur de fichiers du téléphone */
 document.addEventListener('click',function(e){var l=e.target.closest&&e.target.closest('label[for]');if(!l)return;var i=document.getElementById(l.htmlFor);if(!i||i.type!=='file')return;e.preventDefault();try{i.value=''}catch(_){}i.click()},true);
-</script></body></html>
+</script>
+<script>if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})}</script></body></html>
