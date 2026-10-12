@@ -598,6 +598,20 @@ p{margin:0}
 .gk .k-list{margin-left:38px}
 .new-flag{position:absolute;right:10px;top:10px;z-index:2;padding:4px 10px;border-radius:999px;font:700 11px var(--display);letter-spacing:.04em;color:var(--on-acc);background:var(--orange);box-shadow:0 4px 14px -4px var(--orange)}
 .new-strip button{width:72px}.new-strip small{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72px;margin-top:-4px}
+.seg4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.seg4 button{height:46px;border-radius:14px;background:var(--panel-2);border:1.5px solid transparent;font-size:13.5px;font-weight:700;color:var(--t2);display:flex;align-items:center;justify-content:center;gap:8px}
+.seg4 button span{font-size:17px}
+.seg4 button.on{border-color:var(--orange);background:rgba(46,224,176,.12);color:var(--text)}.seg4 button.on.off{border-color:var(--line);background:var(--panel-2)}
+.seg4 button.on.rencontre{border-color:#FF6B9A;background:rgba(255,107,154,.12)}.seg4 button.on.diner{border-color:#FFB547;background:rgba(255,181,71,.12)}.seg4 button.on.chill{border-color:#5AC8FA;background:rgba(90,200,250,.12)}
+.intents{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0 4px}
+.intents button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:18px;background:var(--panel);border:1.5px solid var(--line);color:var(--t2)}
+.intents span{font-size:22px;line-height:1.1}.intents b{font:700 13.5px var(--display)}.intents small{font-size:10.5px;color:var(--muted)}
+.intents button.on{border-color:var(--orange);background:rgba(46,224,176,.1);color:var(--text)}
+.intents button.on.rencontre{border-color:#FF6B9A;background:rgba(255,107,154,.12)}.intents button.on.diner{border-color:#FFB547;background:rgba(255,181,71,.12)}.intents button.on.chill{border-color:#5AC8FA;background:rgba(90,200,250,.12)}
+.av-flag.rencontre{color:#FF9DBB}.av-flag.diner{color:#FFC977}.av-flag.chill{color:#8FD9FF}
+.av-chip.rencontre{background:rgba(255,107,154,.14);border-color:rgba(255,107,154,.5);color:#FF9DBB}.av-chip.rencontre i{background:#FF6B9A}
+.av-chip.diner{background:rgba(255,181,71,.14);border-color:rgba(255,181,71,.5);color:#FFC977}.av-chip.diner i{background:#FFB547}
+.av-chip.chill{background:rgba(90,200,250,.14);border-color:rgba(90,200,250,.5);color:#8FD9FF}.av-chip.chill i{background:#5AC8FA}
 .icon-btn.mus{color:var(--orange-2)}.icon-btn.mus.off{color:var(--muted);opacity:.55}.icon-btn.mus.off svg path:last-child{opacity:0}
 
 
@@ -1275,7 +1289,7 @@ function makeDemoBackend(){
     ['d4','Jonathan','Mukendi',29,'Comptable','+243 97 000 0044','Goma','RD Congo','Simple et posé. Je crois aux relations construites sur la confiance.'],
     ['d5','Divine','Nsimba',27,'Juriste','+242 06 000 0055','Brazzaville','Congo','Curieuse, j\'adore voyager et découvrir de nouvelles cultures.'],
     ['d6','Christelle','Lusamba',30,'Pharmacienne','+243 85 000 0066','Kisangani','RD Congo','Joyeuse et attentionnée. La famille compte beaucoup pour moi.']];
-  const dz=[['Lemba','today'],['Lubumbashi','weekend'],['Gombe','today'],['Goma','off'],['Brazzaville','weekend'],['Kisangani','off']];
+  const dz=[['Lemba','rencontre'],['Lubumbashi','diner'],['Gombe','chill'],['Goma','diner'],['Brazzaville','rencontre'],['Kisangani','off']];
   samples.forEach((a,i)=>{L.p.push({...(i===0?{certified:true,handle:'grace.mbuyi'}:{}),...(i===1?{phoneHidden:true}:{}),sex:'FHFHFF'[i],avail:{state:dz[i][1],until:availUntil(dz[i][1])},zone:{name:dz[i][0],lat:ZONES[dz[i][0]][0],lon:ZONES[dz[i][0]][1]},id:a[0],firstName:a[1],lastName:a[2],age:a[3],job:a[4],phone:a[5],city:a[6],country:a[7],bio:a[8],photo:art(1000+i*97,i),paid:true,demo:true,at:now-(i+2)*20*H})});
   const caps=['Dimanche au bord du fleuve 🌅','Nouvelle coupe, nouvelle énergie','Soirée entre amis','Ma ville la nuit','Café et bonne humeur','Prête pour le week-end'];
   samples.forEach((a,i)=>{L.po.push({id:'p'+i,uid:a[0],img:art(2000+i*131,i+1),caption:caps[i],at:now-(i*3+1)*H,likes:i%2?['d2','d4']:['d1']})});
@@ -1634,15 +1648,18 @@ function vDiscover(){const q=(S.route.q||'').toLowerCase(),city=S.route.city||''
   const all=Object.entries(S.profiles).filter(([id,x])=>id!==S.be.uid&&x&&x.firstName).sort((a,b)=>(b[1].at||0)-(a[1].at||0));
   const NEWD=7*864e5,isNewM=x=>(x.at||0)>Date.now()-NEWD;const fresh=all.filter(([,x])=>isNewM(x)).slice(0,12);
   const cities=[...new Set(all.map(([,x])=>x.city).filter(Boolean))].sort();
-  const list=all.filter(([,x])=>(!city||x.city===city)&&(!q||[fullName(x),x.job,x.city,x.country].join(' ').toLowerCase().includes(q)));
+  const intent=S.route.intent||'';const icount=k=>all.filter(([,x])=>availOf(x)===k).length;
+  const list=all.filter(([,x])=>(!intent||availOf(x)===intent)&&(!city||x.city===city)&&(!q||[fullName(x),x.job,x.city,x.country].join(' ').toLowerCase().includes(q)));
   const cols=[[],[]];list.forEach((e,i)=>cols[i%2].push([e,i]));
-  const card=([[id,x],i])=>{const img=safeImg(x.photo);const fav=S.favs.has(id);return `<div class="pcard ${i%3===1?'tall':''}">${isNewM(x)?'<span class="new-flag">Nouveau</span>':''}<button data-profile="${esc(id)}" style="display:block;width:100%" aria-label="Voir le profil de ${esc(x.firstName)}"><div class="ph">${img?`<img src="${img}" alt="">`:`<div class="initials-ph">${esc(initials(x))}</div>`}</div>${availOf(x)!=='off'?`<span class="av-flag">${availOf(x)==='today'?'Dispo aujourd\'hui':'Dispo week-end'}</span>`:''}</button>
+  const card=([[id,x],i])=>{const img=safeImg(x.photo);const fav=S.favs.has(id);return `<div class="pcard ${i%3===1?'tall':''}">${isNewM(x)?'<span class="new-flag">Nouveau</span>':''}<button data-profile="${esc(id)}" style="display:block;width:100%" aria-label="Voir le profil de ${esc(x.firstName)}"><div class="ph">${img?`<img src="${img}" alt="">`:`<div class="initials-ph">${esc(initials(x))}</div>`}</div>${availOf(x)!=='off'?`<span class="av-flag ${availOf(x)}">${INTENTS.find(t=>t[0]===availOf(x))[2]} ${INT_LBL[availOf(x)]}</span>`:''}</button>
     <div class="ov"><div><span class="loc">${I.pin.replace('<svg','<svg width="11" height="11"')}${esc([x.commune,x.city,x.country].filter(Boolean).join(', '))}</span><span class="nm"><span>${esc(x.firstName)}${x.age?', '+esc(x.age):''}</span>${x.certified?I.badge:''}</span><span class="job">${esc(x.job)}</span></div><button class="heart-mini ${fav?'on':''}" data-fav="${esc(id)}" aria-label="Coup de cœur">${I.heart}</button></div></div>`};
   return `<header class="top"><h1 style="font-size:26px;font-weight:700">Découvrir</h1><div class="hd-r"><button class="kori-btn" data-act="guide" aria-label="Gucko, ton assistant" title="Gucko">${I.spark}<span>Gucko</span></button>${bellHtml()}<button class="icon-btn" data-go="me" style="padding:0;overflow:hidden" aria-label="Mon profil">${av(me(),42)}</button></div></header>
   <div class="search"><label>${I.search.replace('<svg','<svg width="18" height="18"')}<input id="q" placeholder="Nom, métier, ville…" value="${esc(S.route.q||'')}" aria-label="Rechercher"></label></div>
-  ${fresh.length&&!q&&!city?`<div class="sec-head" style="margin:16px 0 10px"><h2>Nouveaux inscrits</h2><span class="count">${fresh.length}</span></div><div class="strip new-strip">${fresh.map(([id,x])=>`<button data-profile="${esc(id)}"><span class="ring">${av(x,58)}</span><span>${esc(x.firstName)}</span><small>${esc(x.commune||x.city||'')}</small></button>`).join('')}</div>`:''}
+  <div class="intents">${[['','Tous','✨'],...INTENTS].map(([k,l,e])=>`<button type="button" data-intent="${k}" class="${intent===k?'on '+k:''}"><span>${e}</span><b>${l}</b><small>${k?icount(k)+' dispo':all.length+' membres'}</small></button>`).join('')}</div>
+  ${intent?`<div class="sec-head" style="margin:14px 0 10px"><h2>${intent==='diner'?'Disponibles pour un dîner':intent==='chill'?'Disponibles pour un chill':'Disponibles pour une rencontre'}</h2><span class="count">${list.length}</span></div>`:''}
+  ${fresh.length&&!q&&!city&&!intent?`<div class="sec-head" style="margin:16px 0 10px"><h2>Nouveaux inscrits</h2><span class="count">${fresh.length}</span></div><div class="strip new-strip">${fresh.map(([id,x])=>`<button data-profile="${esc(id)}"><span class="ring">${av(x,58)}</span><span>${esc(x.firstName)}</span><small>${esc(x.commune||x.city||'')}</small></button>`).join('')}</div>`:''}
   <div class="chips"><button class="${!city?'on':''}" data-city="">Toutes les villes</button>${cities.map(c=>`<button class="${c===city?'on':''}" data-city="${esc(c)}">${esc(c)}</button>`).join('')}</div>
-  <div id="gridWrap">${list.length?`<div class="grid"><div class="col">${cols[0].map(card).join('')}</div><div class="col">${cols[1].map(card).join('')}</div></div>`:`<div class="empty">${I.compass}<b>${all.length?'Aucun profil ne correspond':'Personne ici pour le moment'}</b><p>${all.length?'Essaie une autre ville ou un autre mot.':'Les nouveaux membres apparaîtront ici dès leur inscription.'}</p></div>`}</div>
+  <div id="gridWrap">${list.length?`<div class="grid"><div class="col">${cols[0].map(card).join('')}</div><div class="col">${cols[1].map(card).join('')}</div></div>`:`<div class="empty">${I.compass}<b>${intent?'Personne pour l\'instant dans « '+INT_LBL[intent]+' »':all.length?'Aucun profil ne correspond':'Personne ici pour le moment'}</b><p>${intent?'Sois le premier : choisis « '+INT_LBL[intent]+' » dans « Ma disponibilité » sur ton profil.':all.length?'Essaie une autre ville ou un autre mot.':'Les nouveaux membres apparaîtront ici dès leur inscription.'}</p></div>`}</div>
   ${navHtml('discover')}`}
 
 const coverCache={};
@@ -1652,17 +1669,18 @@ function coverFor(id,x){const own=safeImg(x.cover);if(own)return own;
 /* =================== Disponibilité et zone =================== */
 const ZONES={'Gombe':[-4.307,15.300],'Kinshasa (commune)':[-4.328,15.305],'Barumbu':[-4.317,15.320],'Lingwala':[-4.327,15.293],'Kintambo':[-4.330,15.268],'Ngaliema':[-4.360,15.250],'Mont-Ngafula':[-4.450,15.270],'Selembao':[-4.385,15.278],'Bumbu':[-4.370,15.290],'Makala':[-4.370,15.305],'Ngiri-Ngiri':[-4.350,15.295],'Kasa-Vubu':[-4.340,15.305],'Bandalungwa':[-4.343,15.282],'Kalamu':[-4.345,15.315],'Lemba':[-4.390,15.320],'Ngaba':[-4.385,15.322],'Limete':[-4.355,15.345],'Matete':[-4.385,15.345],'Kisenso':[-4.410,15.340],'Ndjili':[-4.385,15.385],'Masina':[-4.385,15.410],'Kimbanseke':[-4.430,15.400],'Nsele':[-4.380,15.500],'Maluku':[-4.070,15.570],
  'Lubumbashi':[-11.664,27.483],'Goma':[-1.679,29.228],'Bukavu':[-2.508,28.861],'Kisangani':[0.515,25.191],'Mbuji-Mayi':[-6.136,23.590],'Kananga':[-5.896,22.417],'Matadi':[-5.826,13.459],'Kolwezi':[-10.716,25.472],'Brazzaville':[-4.263,15.242],'Pointe-Noire':[-4.778,11.864]};
-const AVL={today:'Dispo aujourd\'hui',weekend:'Dispo ce week-end',off:'Pas dispo'};
-function availUntil(st){const d=new Date();if(st==='today'){d.setHours(23,59,59,0);return +d}if(st==='weekend'){const add=(7-d.getDay())%7;d.setDate(d.getDate()+add);d.setHours(23,59,59,0);return +d}return 0}
-const availOf=x=>{const a=x?.avail;return a&&a.state&&a.state!=='off'&&a.until>Date.now()?a.state:'off'};
+const AVL={chill:'Dispo pour un chill',rencontre:'Dispo pour une rencontre',diner:'Dispo pour un dîner',off:'Pas dispo'};
+const INTENTS=[['chill','Chill','😎'],['rencontre','Rencontre','💗'],['diner','Dîner','🍽️']];const INT_LBL={chill:'Chill',rencontre:'Rencontre',diner:'Dîner'};
+function availUntil(st){return st&&st!=='off'?Date.now()+30*864e5:0}
+const availOf=x=>{const a=x?.avail;if(!a||!a.state||a.state==='off'||!(a.until>Date.now()))return 'off';return a.state==='today'||a.state==='weekend'?'rencontre':(AVL[a.state]?a.state:'off')};
 function zoneOf(x){const z=x?.zone;if(z&&typeof z.lat==='number'&&typeof z.lon==='number')return z;const c=ZONES[x?.city]||null;return c?{name:x.city,lat:c[0],lon:c[1],rough:true}:null}
 function km(a,b){if(!a||!b)return null;const R=6371,r=Math.PI/180,dl=(b.lat-a.lat)*r,dn=(b.lon-a.lon)*r;const h=Math.sin(dl/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 const kmTxt=d=>d==null?'':d<1?'à moins de 1 km':d<100?'à ~'+Math.round(d)+' km':'à '+Math.round(d)+' km';
 const mapUrl=z=>`https://www.openstreetmap.org/?mlat=${z.lat.toFixed(3)}&mlon=${z.lon.toFixed(3)}#map=15/${z.lat.toFixed(3)}/${z.lon.toFixed(3)}`;
 const availChip=x=>{const st=availOf(x);return st==='off'?'':`<span class="av-chip ${st}"><i></i>${AVL[st]}</span>`};
 function availPanel(x){const st=availOf(x);const z=x.zone||{};
-  return `<div class="avail-box"><div class="ab-h"><b>Ma disponibilité</b><small>${st==='off'?'Les autres ne te voient pas comme disponible.':'Gucko te propose aux membres qui cherchent quelqu\'un de disponible près d\'eux.'}</small></div>
-   <div class="seg3" role="radiogroup" aria-label="Disponibilité">${['today','weekend','off'].map(k=>`<button type="button" data-avail="${k}" role="radio" aria-checked="${st===k}" class="${st===k?'on '+k:''}">${k==='off'?'Pas dispo':k==='today'?'Aujourd\'hui':'Ce week-end'}</button>`).join('')}</div>
+  return `<div class="avail-box"><div class="ab-h"><b>Ma disponibilité</b><small>${st==='off'?'Les autres ne te voient pas comme disponible.':'Tu apparais dans la rubrique « '+INT_LBL[st]+' » de Découvrir, et Gucko te propose aux membres près de toi.'}</small></div>
+   <div class="seg4" role="radiogroup" aria-label="Disponibilité">${[...INTENTS,['off','Pas dispo','🚫']].map(([k,l,e])=>`<button type="button" data-avail="${k}" role="radio" aria-checked="${st===k}" class="${st===k?'on '+k:''}"><span>${e}</span>${l}</button>`).join('')}</div>
    <div class="zone-row">${I.pin}<select id="zoneSel" aria-label="Ma zone"><option value="">Choisis ta commune / ville</option>${Object.keys(ZONES).map(n=>`<option ${z.name===n&&!z.gps?'selected':''}>${n}</option>`).join('')}${z.gps?`<option selected value="__gps">Ma position (${esc(z.name||'GPS')})</option>`:''}</select><button type="button" class="mini" data-gps="1">Ma position</button></div>
    <p class="hint" style="font-size:11.5px">Seule une zone approximative (à ~1 km près) est partagée, jamais ton adresse exacte.</p></div>`}
 
@@ -1925,9 +1943,9 @@ Ce que fait l'application :
 - Profil (bonhomme) : photo de profil, couverture et statut via les boutons sous le nom ; Informations ; Publications. L'interrupteur sur la ligne Téléphone masque ou affiche son numéro aux autres. Le crayon en haut recommence l'inscription. La roue dentée ouvre les Réglages : mode sombre ou normal, sons, vibreur, aide.
 - Profil d'un autre membre : boutons « Écrire » et « J'aime » (coup de cœur), copier son numéro s'il est visible.
 - Certification : 5 $ une seule fois, carte « Obtenir le badge certifié » sur son profil ; on choisit un nom d'utilisateur @ unique, on paie, le service valide, puis le badge s'affiche et le nom est réservé.
-- Disponibilité : sur son profil, « Ma disponibilité » (Aujourd'hui, Ce week-end, Pas dispo) et « Ma zone » (commune ou position approximative). Pour trouver quelqu'un de dispo près de soi, il suffit de demander à Gucko (ex. « qui est dispo aujourd'hui près de moi ? ») : Gucko affiche les profils avec la distance, un bouton carte et un bouton pour écrire.
+- Disponibilité : sur son profil, « Ma disponibilité » (Chill, Rencontre, Dîner ou Pas dispo). Dans Découvrir, les rubriques Chill, Rencontre et Dîner regroupent les membres disponibles pour chacun. Aussi et « Ma zone » (commune ou position approximative). Pour trouver quelqu'un de dispo près de soi, il suffit de demander à Gucko (ex. « qui est dispo aujourd'hui près de moi ? ») : Gucko affiche les profils avec la distance, un bouton carte et un bouton pour écrire.
 - Sécurité : premier rendez-vous dans un lieu public, prévenir un proche, ne jamais envoyer d'argent à un membre. Les règles sont dans « À propos ».`;
-const FIND_CHIPS=[['Qui est dispo aujourd\'hui près de moi ?',{when:'today'}],['Dispo ce week-end',{when:'weekend'}],['Femmes dispo près de moi',{when:'any',sex:'F'}],['Hommes dispo près de moi',{when:'any',sex:'H'}]];
+const FIND_CHIPS=[['Qui est dispo pour un dîner ?',{when:'diner'}],['Qui est dispo pour une rencontre ?',{when:'rencontre'}],['Qui est dispo pour un chill ?',{when:'chill'}],['Femmes dispo près de moi',{when:'any',sex:'F'}],['Hommes dispo près de moi',{when:'any',sex:'H'}]];
 const GUIDE_FAQ=[['Comment m\'inscrire ?','1. Sur l\'accueil, touche « Commencer ».\n2. Ajoute ta photo et remplis tes infos (18 ans minimum).\n3. Coche les règles et touche « S\'inscrire ».\n'+(SUBSCRIPTION?'4. Paie 10 000 FC par Mobile Money : 5 000 FC d\'inscription + 5 000 FC pour le premier mois.':'4. Paie 5 000 FC par Mobile Money, une seule fois, pour accéder à Koris.')],
  SUBSCRIPTION?['Comment payer l\'abonnement ?','1. Choisis Orange Money, Airtel Money ou M-Pesa.\n2. Envoie le montant affiché au numéro indiqué (bouton « Copier ») : 10 000 FC la première fois (inscription + 1er mois), puis 5 000 FC par mois.\n3. Entre le numéro qui a payé et la référence du SMS, puis « J\'ai payé ».\nTon accès s\'ouvre pour 30 jours dès la vérification.']:['Comment payer l\'accès ?','1. Choisis Orange Money, Airtel Money ou M-Pesa.\n2. Envoie 5 000 FC au numéro indiqué (bouton « Copier »). On paie une seule fois.\n3. Entre le numéro qui a payé et la référence du SMS, puis « J\'ai payé ».\nTon accès s\'ouvre dès la vérification.'],
  ['Comment publier une photo ?','Touche le gros bouton « + » en bas au centre, choisis une photo ou une vidéo, écris un petit message, puis « Publier ». Pour une story, utilise « Ta story » dans Messages.'],
@@ -1936,20 +1954,20 @@ const GUIDE_FAQ=[['Comment m\'inscrire ?','1. Sur l\'accueil, touche « Commence
  ['C\'est quoi la certification ?','Pour 5 $ une seule fois, tu obtiens le badge à côté de ton nom et un nom d\'utilisateur @ que personne d\'autre ne peut prendre. Touche « Obtenir le badge certifié » sur ton profil.']];
 function findPeople(o={}){const meP=me()||{},mz=zoneOf(meP);
   let l=Object.entries(S.profiles).filter(([id,x])=>id!==S.be.uid&&x.paid&&!x.owner);
-  if(o.when==='today')l=l.filter(([,x])=>availOf(x)==='today');else if(o.when==='weekend')l=l.filter(([,x])=>availOf(x)!=='off');else if(o.when==='any')l=l.filter(([,x])=>availOf(x)!=='off');
+  if(AVL[o.when]&&o.when!=='off')l=l.filter(([,x])=>availOf(x)===o.when);else if(o.when==='any')l=l.filter(([,x])=>availOf(x)!=='off');
   if(o.sex)l=l.filter(([,x])=>x.sex===o.sex);
   if(o.city){const c=o.city.toLowerCase();l=l.filter(([,x])=>(x.city||'').toLowerCase().includes(c)||(x.zone?.name||'').toLowerCase().includes(c))}
   if(o.ageMax)l=l.filter(([,x])=>!x.age||x.age<=o.ageMax);if(o.ageMin)l=l.filter(([,x])=>!x.age||x.age>=o.ageMin);
   const r=l.map(([id,x])=>({id,x,d:km(mz,zoneOf(x)),st:availOf(x)}));
-  r.sort((a,b)=>(a.st==='today'?0:a.st==='weekend'?1:2)-(b.st==='today'?0:b.st==='weekend'?1:2)||(a.d??1e9)-(b.d??1e9));return r.slice(0,o.limit||6)}
+  r.sort((a,b)=>(a.st==='off'?1:0)-(b.st==='off'?1:0)||(a.d??1e9)-(b.d??1e9));return r.slice(0,o.limit||6)}
 function parseFind(q){const t=q.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
   if(!/(dispo|disponible|proche|pres d|pres de moi|autour|a cote|trouve|cherche|rencontr|qui est|quelqu.un|personne|femme|fille|homme|garcon|celib|aujourd|ce soir|week|weekend|sortir|voir quelqu)/.test(t))return null;
   if(/(comment|ou se trouve|c.est quoi|pourquoi|payer|abonnement|inscri|mot de passe|photo de profil|publier|certif)/.test(t)&&!/(dispo|proche|trouve|cherche)/.test(t))return null;
-  const o={};if(/(aujourd|ce soir|maintenant|tout de suite|ce jour)/.test(t))o.when='today';else if(/week/.test(t))o.when='weekend';else if(/dispo/.test(t))o.when='any';
+  const o={};if(/(diner|manger|resto|restaurant|souper)/.test(t))o.when='diner';else if(/(chill|deal|sortie|sortir|detente|ambiance)/.test(t))o.when='chill';else if(/rencontr/.test(t))o.when='rencontre';else if(/(dispo|aujourd|ce soir|week)/.test(t))o.when='any';
   if(/(femme|fille|meuf|dame)/.test(t))o.sex='F';else if(/(homme|garcon|mec|monsieur)/.test(t))o.sex='H';
   for(const n of Object.keys(ZONES)){const k=n.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').split(' ')[0];if(k.length>3&&t.includes(k)){o.city=n.split(' ')[0];break}}
   return o}
-function findMsg(o,res){const w=o.when==='today'?'disponibles aujourd\'hui':o.when==='weekend'?'disponibles ce week-end':o.when==='any'?'disponibles':'';const who=o.sex==='F'?'femmes':o.sex==='H'?'hommes':'membres';
+function findMsg(o,res){const w=o.when==='diner'?'disponibles pour un dîner':o.when==='chill'?'disponibles pour un chill':o.when==='rencontre'?'disponibles pour une rencontre':o.when==='any'?'disponibles':'';const who=o.sex==='F'?'femmes':o.sex==='H'?'hommes':'membres';
   const mz=zoneOf(me());
   if(!res.length)return `Je n'ai trouvé personne parmi les ${who} ${w}${o.city?' à '+o.city:''} pour l'instant. Réessaie plus tard, ou élargis ta recherche (par exemple « dispo ce week-end »).`;
   return `Voici ${res.length} ${who} ${w}${o.city?' à '+o.city:''}${mz?', du plus proche au plus loin':''} :${mz?'':'\n(Choisis ta commune sur ton profil pour voir les distances.)'}`}
@@ -1998,7 +2016,7 @@ const GKB=[
  {k:['galerie ne s ouvre','photo ne charge','impossible d ajouter','ne s affiche pas','bug photo'],a:()=>'Si la galerie ne s\'ouvre pas, ouvre Koris dans Chrome (ou depuis l\'icône installée) plutôt que dans une autre application, puis réessaie. Vérifie aussi que ton téléphone a encore un peu d\'espace libre.'},
  /* ---- Découvrir et rencontres ---- */
  {k:['decouvrir','chercher','rechercher','trouver un membre','boussole','filtre','par ville'],a:()=>'Dans « Découvrir » (la boussole en bas), tu cherches des membres par nom ou par ville et tu vois leurs profils. Tu peux aussi me demander « qui est dispo aujourd\'hui à Lemba ? » et je te les propose.'},
- {k:['disponib','dispo','ma disponibilite','sortir ce soir','ce week end'],a:()=>'Sur ton profil, « Ma disponibilité » indique si tu es dispo aujourd\'hui, ce week-end ou pas dispo. Pour trouver quelqu\'un de dispo près de toi, demande-moi par exemple « femmes dispo ce soir à Gombe ».'},
+ {k:['disponib','dispo','ma disponibilite','sortir ce soir','ce week end'],a:()=>'Sur ton profil, « Ma disponibilité » te permet de choisir Chill, Rencontre ou Dîner (ou Pas dispo). Tu apparais alors dans la rubrique correspondante de Découvrir. Pour trouver quelqu\'un de dispo près de toi, demande-moi par exemple « femmes dispo ce soir à Gombe ».'},
  {k:['ecrire','envoyer un message','message prive','discuter','parler a','contacter un membre','chat'],a:()=>'Pour écrire à quelqu\'un : ouvre son profil (depuis le fil ou Découvrir) et touche « Écrire ». Toutes tes discussions sont dans l\'onglet Messages (la bulle en bas). Un point rouge signale un nouveau message.'},
  {k:['appel','appeler','telephoner','numero d un membre'],a:()=>'Dans Messages, l\'onglet « Appels » te permet d\'appeler un membre par ton téléphone, si ce membre affiche son numéro. Sur son profil, tu peux aussi copier son numéro s\'il est visible.'},
  {k:['en ligne','connecte','point vert','actif'],a:()=>'Un point vert sur la photo d\'un membre et « En ligne » sous son nom veulent dire qu\'il a Koris ouvert en ce moment.'},
@@ -2050,7 +2068,7 @@ const GKI={x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
  spark:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z"/></svg>',
  chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
  spk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg>'};
-const GK_SUGGS=[['Qui est dispo aujourd\'hui près de moi ?',{when:'today'}],['Comment payer l\'accès ?'],['Que dire dans un premier message ?'],['Conseils pour un premier rendez-vous'],['Femmes dispo ce week-end',{when:'weekend',sex:'F'}],['Hommes dispo ce week-end',{when:'weekend',sex:'H'}],['Comment cacher mon numéro ?']];
+const GK_SUGGS=[['Qui est dispo pour un dîner ?',{when:'diner'}],['Qui est dispo pour une rencontre ?',{when:'rencontre'}],['Comment payer l\'accès ?'],['Que dire dans un premier message ?'],['Conseils pour un premier rendez-vous'],['Qui est dispo pour un chill ?',{when:'chill'}],['Comment cacher mon numéro ?']];
 const GV={view:'home',state:'idle',rec:null,auto:true,voices:null};
 const GK_SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 async function gkReply(q,forced){const fo=forced||parseFind(q);
@@ -2156,6 +2174,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button,[da
   if(d.copy!==undefined){if(d.copy)copyText(d.copy);return}
   if(d.fav){d.fav&&(S.favs.has(d.fav)?(S.favs.delete(d.fav),fx.unlike()):(S.favs.add(d.fav),fx.like()));ls.set('favs',[...S.favs]);if(S.favs.has(d.fav))toast('Ajouté à tes coups de cœur');return render()}
   if(d.city!==undefined){S.route.city=d.city;S.route.focus=false;return render()}
+  if(d.intent!==undefined&&S.route.v==='discover'){S.route.intent=d.intent;S.route.focus=false;return render()}
   if(d.play){const x=S.posts.find(p=>p.id===d.play);if(!x||!isVid(x))return;const box=$('#pv-'+CSS.escape(x.id));t.disabled=true;t.querySelector('small').textContent='Chargement…';
     try{const src=vidCache[x.id]||(vidCache[x.id]=await S.be.getVideo(x.vid));if(box){box.removeAttribute('id');box.innerHTML=`<video src="${src}" controls autoplay playsinline></video>`}}catch(_){t.disabled=false;t.querySelector('small').textContent='Vidéo';toast("La vidéo n'a pas pu être chargée")}return}
   if(d.vview){const x=S.posts.find(p=>p.id===d.vview);if(!x||!isVid(x))return;const L=$('#layer');L.innerHTML=`<div class="lightbox" id="lb"><div class="spin"></div><button class="icon-btn" id="lbX" aria-label="Fermer">${I.x}</button></div>`;$('#lb').onclick=e=>{if(e.target.id!=='lb'&&!e.target.closest('#lbX'))return;L.innerHTML=''};
