@@ -596,6 +596,8 @@ p{margin:0}
 .gk-bar{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 18px;border-radius:999px;background:rgba(15,46,41,.75);border:1px solid rgba(241,251,247,.1);backdrop-filter:blur(10px);flex:none}
 .gk-bar input{flex:1;min-width:0;border:0;outline:0;background:none;color:#F1FBF7;font-size:15px;height:44px}.gk-bar input::placeholder{color:rgba(241,251,247,.55)}
 .gk .k-list{margin-left:38px}
+.new-flag{position:absolute;right:10px;top:10px;z-index:2;padding:4px 10px;border-radius:999px;font:700 11px var(--display);letter-spacing:.04em;color:var(--on-acc);background:var(--orange);box-shadow:0 4px 14px -4px var(--orange)}
+.new-strip button{width:72px}.new-strip small{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72px;margin-top:-4px}
 .icon-btn.mus{color:var(--orange-2)}.icon-btn.mus.off{color:var(--muted);opacity:.55}.icon-btn.mus.off svg path:last-child{opacity:0}
 
 
@@ -1629,14 +1631,16 @@ function postHtml(x){const a=S.profiles[x.uid]||{};const likes=Array.isArray(x.l
   ${last?`<button class="post-last" data-cmt="${esc(x.id)}"><b>${esc(la.firstName||'Membre')}</b> ${esc(last.text.length>90?last.text.slice(0,90)+'…':last.text)}${cms.length>1?` · voir les ${cms.length} commentaires`:''}</button>`:''}</article>`}
 
 function vDiscover(){const q=(S.route.q||'').toLowerCase(),city=S.route.city||'';
-  const all=Object.entries(S.profiles).filter(([id,x])=>id!==S.be.uid&&x.paid);
+  const all=Object.entries(S.profiles).filter(([id,x])=>id!==S.be.uid&&x&&x.firstName).sort((a,b)=>(b[1].at||0)-(a[1].at||0));
+  const NEWD=7*864e5,isNewM=x=>(x.at||0)>Date.now()-NEWD;const fresh=all.filter(([,x])=>isNewM(x)).slice(0,12);
   const cities=[...new Set(all.map(([,x])=>x.city).filter(Boolean))].sort();
   const list=all.filter(([,x])=>(!city||x.city===city)&&(!q||[fullName(x),x.job,x.city,x.country].join(' ').toLowerCase().includes(q)));
   const cols=[[],[]];list.forEach((e,i)=>cols[i%2].push([e,i]));
-  const card=([[id,x],i])=>{const img=safeImg(x.photo);const fav=S.favs.has(id);return `<div class="pcard ${i%3===1?'tall':''}"><button data-profile="${esc(id)}" style="display:block;width:100%" aria-label="Voir le profil de ${esc(x.firstName)}"><div class="ph">${img?`<img src="${img}" alt="">`:`<div class="initials-ph">${esc(initials(x))}</div>`}</div>${availOf(x)!=='off'?`<span class="av-flag">${availOf(x)==='today'?'Dispo aujourd\'hui':'Dispo week-end'}</span>`:''}</button>
+  const card=([[id,x],i])=>{const img=safeImg(x.photo);const fav=S.favs.has(id);return `<div class="pcard ${i%3===1?'tall':''}">${isNewM(x)?'<span class="new-flag">Nouveau</span>':''}<button data-profile="${esc(id)}" style="display:block;width:100%" aria-label="Voir le profil de ${esc(x.firstName)}"><div class="ph">${img?`<img src="${img}" alt="">`:`<div class="initials-ph">${esc(initials(x))}</div>`}</div>${availOf(x)!=='off'?`<span class="av-flag">${availOf(x)==='today'?'Dispo aujourd\'hui':'Dispo week-end'}</span>`:''}</button>
     <div class="ov"><div><span class="loc">${I.pin.replace('<svg','<svg width="11" height="11"')}${esc([x.commune,x.city,x.country].filter(Boolean).join(', '))}</span><span class="nm"><span>${esc(x.firstName)}${x.age?', '+esc(x.age):''}</span>${x.certified?I.badge:''}</span><span class="job">${esc(x.job)}</span></div><button class="heart-mini ${fav?'on':''}" data-fav="${esc(id)}" aria-label="Coup de cœur">${I.heart}</button></div></div>`};
   return `<header class="top"><h1 style="font-size:26px;font-weight:700">Découvrir</h1><div class="hd-r"><button class="kori-btn" data-act="guide" aria-label="Gucko, ton assistant" title="Gucko">${I.spark}<span>Gucko</span></button>${bellHtml()}<button class="icon-btn" data-go="me" style="padding:0;overflow:hidden" aria-label="Mon profil">${av(me(),42)}</button></div></header>
   <div class="search"><label>${I.search.replace('<svg','<svg width="18" height="18"')}<input id="q" placeholder="Nom, métier, ville…" value="${esc(S.route.q||'')}" aria-label="Rechercher"></label></div>
+  ${fresh.length&&!q&&!city?`<div class="sec-head" style="margin:16px 0 10px"><h2>Nouveaux inscrits</h2><span class="count">${fresh.length}</span></div><div class="strip new-strip">${fresh.map(([id,x])=>`<button data-profile="${esc(id)}"><span class="ring">${av(x,58)}</span><span>${esc(x.firstName)}</span><small>${esc(x.commune||x.city||'')}</small></button>`).join('')}</div>`:''}
   <div class="chips"><button class="${!city?'on':''}" data-city="">Toutes les villes</button>${cities.map(c=>`<button class="${c===city?'on':''}" data-city="${esc(c)}">${esc(c)}</button>`).join('')}</div>
   <div id="gridWrap">${list.length?`<div class="grid"><div class="col">${cols[0].map(card).join('')}</div><div class="col">${cols[1].map(card).join('')}</div></div>`:`<div class="empty">${I.compass}<b>${all.length?'Aucun profil ne correspond':'Personne ici pour le moment'}</b><p>${all.length?'Essaie une autre ville ou un autre mot.':'Les nouveaux membres apparaîtront ici dès leur inscription.'}</p></div>`}</div>
   ${navHtml('discover')}`}
