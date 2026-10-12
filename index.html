@@ -1850,10 +1850,16 @@ function openHelp(){const L=$('#layer'),h=S.helpCfg||{};const wa=String(h.wa||''
   $('#sbg').onclick=e=>{if(e.target.id==='sbg'||e.target.id==='hClose')L.innerHTML=''}}
 
 /* =================== Guide IA Koris =================== */
-const GUIDE_CTX=`Tu es « Gucko », le guide de l'application de rencontre Koris (RD Congo). Réponds en français simple et chaleureux, en 2 à 5 phrases courtes, avec des étapes numérotées si c'est un mode d'emploi. Tu tutoies. N'invente aucune fonction. Si tu ne sais pas, propose de contacter l'aide (bouton « ? » en haut d'un profil).
+const GUIDE_CTX=`Tu es « Gucko », l'assistant de l'application de rencontre Koris (RD Congo). Tu réponds librement à toutes les questions des membres : utilisation de l'application, paiement, sécurité, conseils de rencontre et de séduction respectueuse, idées de premier message ou de sortie à Kinshasa et ailleurs en RDC, et petite conversation amicale. Réponds en français simple et chaleureux (quelques mots de lingala bienvenus), en 2 à 6 phrases courtes, avec des étapes numérotées si c'est un mode d'emploi. Tu tutoies. N'invente aucune fonction de l'application. Ne donne jamais d'informations personnelles sur un membre. Si tu ne sais pas, propose de contacter l'aide (Réglages → « Aide et contact »).
 Ce que fait l'application :
 - Accueil : bouton « Commencer » pour s'inscrire, lien « J'ai déjà un compte ».
-- Inscription : photo, prénom, nom, sexe, âge (18 ans minimum), métier, téléphone, ville, pays, « À propos de toi », case à cocher pour accepter les règles.
+- Compte : e-mail + mot de passe (8 caractères min.), « Mot de passe oublié ? » sur l'écran de connexion, déconnexion dans Réglages.
+- Inscription : photo, prénom, nom, sexe, âge (18 ans minimum), métier, téléphone, ville, commune (ex. Lemba, Ngaliema, Limete), pays, « À propos de toi », case à cocher pour accepter les règles. Le crayon sur son profil permet de tout modifier.
+- Publications : formats au choix (Original, 9:16, 4:5, 1:1, 3:4, 2:3, 4:3, 3:2, 16:9).
+- En ligne : point vert et « En ligne » quand un membre a Koris ouvert ; « écrit… » avec trois points quand il tape un message.
+- Notifications : cloche en haut du fil et de Découvrir avec les nouveaux inscrits (« Ta commune », « Ta ville ») ; alerte en haut de l'écran quand quelqu'un s'inscrit ; bouton « Activer les notifications du téléphone ».
+- Installation : dans Chrome, ⋮ puis « Installer l'application » pour avoir l'icône Koris ; version Play Store bientôt.
+- Confidentialité : données jamais vendues, messages privés visibles seulement par les deux membres, page « Confidentialité » en bas de l'accueil. Signaler un faux profil ou une arnaque : Réglages → « Aide et contact ».
 - Prix : ${SUBSCRIPTION?"inscription 5 000 FC (une seule fois) + abonnement 5 000 FC par mois, soit 10 000 FC au premier paiement puis 5 000 FC à chaque renouvellement":"accès 5 000 FC, payé une seule fois (pas d'abonnement mensuel pour le moment)"}, par Orange Money, Airtel Money ou M-Pesa. On envoie l'argent au numéro affiché (bouton « Copier » et bouton qui ouvre le menu Mobile Money), puis on entre le numéro qui a payé et la référence du SMS. Le service vérifie puis l'accès s'ouvre${SUBSCRIPTION?" pour 30 jours. On renouvelle depuis son profil (carte « Abonnement »).":"."}
 - Fil (icône maison) : publications des membres, J'aime, commentaires, partage. Le bouton « + » au centre en bas sert à publier une photo, une vidéo (8 Mo max, environ 30 s) ou un texte.
 - Découvrir (boussole) : chercher des membres par nom ou par ville.
@@ -1893,33 +1899,110 @@ function personCard({id,x,d,st}){const z=zoneOf(x);return `<div class="k-card"><
   <div class="k-mid"><b>${esc(x.firstName||'Membre')}${x.age?', '+esc(x.age):''}${x.certified?I.badge:''}</b><small>${st!=='off'?AVL[st]+' · ':''}${esc(z?.name||x.city||'')}${d!=null?' · '+kmTxt(d):''}</small></div>
   ${z?`<a class="k-ic" href="${mapUrl(z)}" target="_blank" rel="noopener" aria-label="Voir la zone de ${esc(x.firstName)} sur la carte">${I.pin}</a>`:''}<button class="k-ic go" data-chat="${esc(id)}" aria-label="Écrire à ${esc(x.firstName)}">${I.chat}</button></div>`}
 
+/* =================== Gucko : base de connaissances complète de Koris =================== */
+const gNorm=t=>String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9@ ]+/g,' ').replace(/\s+/g,' ').trim();
+const PRIX_TXT=()=>SUBSCRIPTION?'5 000 FC d\'inscription + 5 000 FC par mois (10 000 FC au premier paiement)':'5 000 FC, payés une seule fois. Il n\'y a pas d\'abonnement mensuel pour le moment';
+const GKB=[
+ /* ---- Salutations et conversation ---- */
+ {k:['salut','bonjour','bonsoir','hello','hi','coucou','yo','mbote','sango','ca va','cava'],a:()=>`Mbote${me()?.firstName?' '+me().firstName:''} ! 😊 Je suis Gucko, l'assistant de Koris. Pose-moi n'importe quelle question sur l'application : inscription, paiement, messages, photos, rencontres… Je peux aussi te trouver des personnes disponibles près de toi.`},
+ {k:['merci','thanks','top','super','genial','cool','parfait','nice'],a:()=>'Avec plaisir ! 💗 Si tu as une autre question, je suis là.'},
+ {k:['qui es tu','tu es qui','c est qui gucko','gucko','assistant','robot','ia','intelligence'],a:()=>'Je suis Gucko, l\'assistant de Koris. Je connais toute l\'application et je réponds à tes questions à tout moment. Je peux aussi te proposer des membres disponibles près de toi (essaie « qui est dispo aujourd\'hui ? »).'},
+ {k:['koris','c est quoi koris','but de','sert a quoi','pourquoi koris'],a:()=>`Koris est l'application de rencontre de la RDC 💗 Tu y trouves des célibataires de ta ville et de ta commune (Kinshasa, Lubumbashi, Goma, Bukavu, Kisangani…). Tu peux publier des photos et vidéos, discuter en privé, voir qui est en ligne et recevoir une alerte quand quelqu'un de ta commune s'inscrit. L'accès coûte ${PRIX_TXT()}.`},
+ /* ---- Inscription et compte ---- */
+ {k:['inscri','creer un compte','creer compte','nouveau compte','commencer','rejoindre','s inscrire'],a:()=>`Pour t'inscrire :\n1. Sur l'accueil, touche « Commencer ».\n2. Crée ton compte avec ton e-mail et un mot de passe (8 caractères minimum).\n3. Remplis ton profil : photo, prénom, nom, sexe, âge (18 ans minimum), métier, téléphone, ville, commune, pays et quelques mots sur toi.\n4. Coche les règles, puis paie l'accès : ${PRIX_TXT()}.`},
+ {k:['connecter','connexion','me connecter','se connecter','login','entrer dans mon compte','acceder a mon compte','j ai deja un compte'],a:()=>'Pour te connecter : sur l\'accueil, touche « J\'ai déjà un compte · Me connecter », puis entre ton e-mail et ton mot de passe. Si tu as oublié ton mot de passe, touche « Mot de passe oublié ? ».'},
+ {k:['mot de passe','oublie','password','reinitialiser','changer mon mot'],a:()=>'Mot de passe oublié ?\n1. Sur l\'écran de connexion, touche « J\'ai un compte » puis « Mot de passe oublié ? ».\n2. Entre ton e-mail et touche « Recevoir le lien ».\n3. Ouvre le lien reçu (regarde aussi dans les spams) et choisis un nouveau mot de passe.'},
+ {k:['email','e mail','mail de confirmation','confirmer mon email','lien de confirmation','pas recu'],a:()=>'Si on te demande de confirmer ton e-mail, ouvre le message reçu de Koris et touche le lien (regarde aussi dans les spams ou « Promotions »). Ensuite, reviens te connecter. Toujours rien ? Contacte l\'aide depuis les Réglages (roue dentée) → « Aide et contact ».'},
+ {k:['deconnect','se deconnecter','quitter mon compte','logout','sortir du compte'],a:()=>'Pour te déconnecter : va sur ton profil, touche la roue dentée (Réglages), puis « Me déconnecter » en bas.'},
+ {k:['supprimer mon compte','effacer mon compte','fermer mon compte','desinscri','supprimer compte'],a:()=>'Pour supprimer ton compte, écris au service Koris depuis Réglages (roue dentée) → « Aide et contact ». Ton profil, tes publications et tes messages seront effacés. Tu peux aussi consulter la politique de confidentialité en bas de l\'accueil.'},
+ {k:['age','18 ans','mineur','majeur','quel age'],a:()=>'Koris est strictement réservé aux personnes de 18 ans et plus. Un compte de mineur est supprimé.'},
+ {k:['modifier mon profil','changer mes infos','modifier mes informations','recommencer','crayon','changer ma ville','changer ma commune','changer mon nom'],a:()=>'Pour modifier tes informations : va sur ton profil et touche le crayon en haut à droite. Le formulaire d\'inscription s\'ouvre pour tout mettre à jour, et ton accès reste actif.'},
+ {k:['commune','quartier','ma zone','ma position','localisation','position'],a:()=>'Ta commune (Lemba, Ngaliema, Limete, Gombe…) se choisit à l\'inscription. Elle sert à te prévenir quand quelqu\'un de ta commune s\'inscrit. Sur ton profil, « Ma zone » permet aussi d\'afficher une position approximative pour voir les distances avec les autres membres.'},
+ /* ---- Paiement ---- */
+ {k:['prix','combien','cout','coute','tarif','payer','paiement','argent','frais','gratuit'],a:()=>`L'accès à Koris coûte ${PRIX_TXT()}. Tu paies par Orange Money, Airtel Money ou M-Pesa, directement depuis la page de paiement.`},
+ {k:['comment payer','mobile money','m pesa','mpesa','orange money','airtel','envoyer l argent','numero de paiement'],a:()=>`Pour payer :\n1. Choisis Orange Money, Airtel Money ou M-Pesa.\n2. Envoie ${SUBSCRIPTION?'le montant affiché':'5 000 FC'} au numéro indiqué (bouton « Copier », ou le bouton qui ouvre directement le menu Mobile Money).\n3. Après l'envoi, tu reçois un SMS : entre le numéro qui a payé et la référence de la transaction, puis « J'ai payé ».\nTon accès s'ouvre dès que le service a vérifié.`},
+ {k:['verification','attente','en attente','toujours pas active','paiement pas valide','combien de temps','delai','valider mon paiement'],a:()=>'Après ton paiement, le service Koris vérifie la référence du SMS, en général rapidement. Ton accès s\'ouvre tout seul dès la validation. Si ça prend trop de temps, touche « Contacter l\'aide » sur la page de paiement. Si tu t\'es trompé de référence, touche « Corriger les infos du paiement ».'},
+ {k:['refuse','rejete','paiement refuse','erreur de paiement','mauvaise reference'],a:()=>'Si ton paiement est marqué comme non confirmé, vérifie la référence du SMS (et le numéro qui a payé) puis renvoie-les depuis la page de paiement. En cas de doute, contacte l\'aide : Réglages → « Aide et contact ».'},
+ {k:['abonnement','mensuel','chaque mois','renouveler','renouvellement','expire'],a:()=>SUBSCRIPTION?'L\'abonnement coûte 5 000 FC par mois. Tu le renouvelles depuis ton profil (carte « Abonnement ») ou la page de paiement : chaque paiement ajoute 30 jours.':'Il n\'y a pas d\'abonnement mensuel pour le moment : tu paies 5 000 FC une seule fois et ton accès reste actif.'},
+ {k:['rembours','annuler mon paiement','recuperer mon argent'],a:()=>'Pour toute question de remboursement, contacte directement le service Koris depuis Réglages → « Aide et contact », avec la référence de ton paiement.'},
+ /* ---- Fil et publications ---- */
+ {k:['publier','poster','publication','partager une photo','mettre une photo','post'],a:()=>'Pour publier : touche le gros bouton « + » en bas au centre. Écris un message, ajoute une photo ou une vidéo si tu veux, choisis le format, puis « Publier ». Ta publication apparaît dans le fil de tous les membres.'},
+ {k:['format','9 16','1 1','16 9','carre','portrait','paysage','recadrer'],a:()=>'Après avoir ajouté une photo ou une vidéo, choisis son format : Original, 9:16, 4:5, 1:1, 3:4, 2:3, 4:3, 3:2 ou 16:9. L\'aperçu change tout de suite, et la publication s\'affiche dans ce format dans le fil.'},
+ {k:['video','filmer','clip'],a:()=>'Tu peux publier des vidéos de 8 Mo maximum (environ 30 secondes) avec le bouton « + ». Dans le fil, on touche la vidéo pour la lire.'},
+ {k:['supprimer une publication','supprimer mon post','effacer une photo','retirer une publication'],a:()=>'Pour supprimer une de tes publications, touche l\'icône poubelle en haut à droite de la publication dans le fil.'},
+ {k:['like','j aime','aimer','coeur','coup de coeur'],a:()=>'Touche « J\'aime » sous une publication pour réagir (avec un petit son 💗). Sur le profil d\'un membre, le bouton « J\'aime » lui envoie un coup de cœur.'},
+ {k:['commenter','commentaire','repondre a une publication'],a:()=>'Touche l\'icône bulle sous une publication pour voir les commentaires et écrire le tien. Tu peux supprimer tes propres commentaires.'},
+ {k:['partager','partage','envoyer le lien'],a:()=>'Le bouton « Partager » sous une publication ouvre le partage de ton téléphone (WhatsApp, etc.) ou copie le lien.'},
+ {k:['story','stories','statut'],a:()=>'Les stories sont en haut de l\'onglet Messages. Touche « Ta story » pour publier la tienne. Tu peux aussi changer ton statut depuis les boutons sous ton nom sur ton profil.'},
+ /* ---- Photos du profil ---- */
+ {k:['photo de profil','ma photo','changer ma photo','avatar','galerie','ajouter photo'],a:()=>'Pour ta photo de profil : va sur ton profil et touche le rond avec le petit appareil photo, puis choisis une photo dans ta galerie. Elle s\'enregistre tout de suite.'},
+ {k:['couverture','banniere','image de fond'],a:()=>'Pour changer ton image de couverture : sur ton profil, touche l\'icône image en haut à droite de la grande photo du haut.'},
+ {k:['galerie ne s ouvre','photo ne charge','impossible d ajouter','ne s affiche pas','bug photo'],a:()=>'Si la galerie ne s\'ouvre pas, ouvre Koris dans Chrome (ou depuis l\'icône installée) plutôt que dans une autre application, puis réessaie. Vérifie aussi que ton téléphone a encore un peu d\'espace libre.'},
+ /* ---- Découvrir et rencontres ---- */
+ {k:['decouvrir','chercher','rechercher','trouver un membre','boussole','filtre','par ville'],a:()=>'Dans « Découvrir » (la boussole en bas), tu cherches des membres par nom ou par ville et tu vois leurs profils. Tu peux aussi me demander « qui est dispo aujourd\'hui à Lemba ? » et je te les propose.'},
+ {k:['disponib','dispo','ma disponibilite','sortir ce soir','ce week end'],a:()=>'Sur ton profil, « Ma disponibilité » indique si tu es dispo aujourd\'hui, ce week-end ou pas dispo. Pour trouver quelqu\'un de dispo près de toi, demande-moi par exemple « femmes dispo ce soir à Gombe ».'},
+ {k:['ecrire','envoyer un message','message prive','discuter','parler a','contacter un membre','chat'],a:()=>'Pour écrire à quelqu\'un : ouvre son profil (depuis le fil ou Découvrir) et touche « Écrire ». Toutes tes discussions sont dans l\'onglet Messages (la bulle en bas). Un point rouge signale un nouveau message.'},
+ {k:['appel','appeler','telephoner','numero d un membre'],a:()=>'Dans Messages, l\'onglet « Appels » te permet d\'appeler un membre par ton téléphone, si ce membre affiche son numéro. Sur son profil, tu peux aussi copier son numéro s\'il est visible.'},
+ {k:['en ligne','connecte','point vert','actif'],a:()=>'Un point vert sur la photo d\'un membre et « En ligne » sous son nom veulent dire qu\'il a Koris ouvert en ce moment.'},
+ {k:['ecrit','en train d ecrire','trois points','typing'],a:()=>'Quand ton interlocuteur tape un message, tu vois « écrit… » avec trois points animés sous son nom et une petite bulle au-dessus de la zone de saisie.'},
+ {k:['cacher mon numero','masquer','numero visible','vie privee','telephone visible'],a:()=>'Pour cacher ton numéro : sur ton profil, ligne « Téléphone », éteins l\'interrupteur. Les autres verront « Numéro masqué par le membre ». Rallume-le quand tu veux.'},
+ /* ---- Notifications ---- */
+ {k:['notification','cloche','alerte','nouveau membre','nouvel inscrit','prevenu'],a:()=>'La cloche (en haut du fil et de Découvrir) affiche les nouveaux inscrits, avec l\'étiquette « Ta commune » ou « Ta ville ». Une alerte apparaît aussi quand quelqu\'un s\'inscrit pendant que tu es sur Koris. Dans la liste, touche « Activer les notifications du téléphone » pour être prévenu même quand Koris est en arrière-plan.'},
+ /* ---- Certification ---- */
+ {k:['certif','badge','verifie','nom d utilisateur','@','pseudo'],a:()=>'La certification coûte 5 $ une seule fois. Tu obtiens le badge à côté de ton nom et un nom d\'utilisateur @ que personne d\'autre ne peut prendre. Sur ton profil, touche « Obtenir le badge certifié », choisis ton @, paie, puis le service valide.'},
+ /* ---- Réglages et appli ---- */
+ {k:['reglage','parametre','roue dentee','options'],a:()=>'Les Réglages s\'ouvrent avec la roue dentée sur ton profil : mode sombre ou normal, sons, vibreur, aide et déconnexion.'},
+ {k:['mode sombre','mode clair','theme','couleur','fond noir','fond blanc'],a:()=>'Pour passer du mode sombre au mode normal : Réglages (roue dentée sur ton profil) → Apparence.'},
+ {k:['sons','le son','pas de son','bruit','musique','muet','volume','silence'],a:()=>'Les sons concernent le « J\'aime », l\'intro et la musique de l\'inscription. Tu les coupes dans Réglages → « Sons ». Pour la musique d\'inscription, touche aussi le haut-parleur en haut à droite. Pour entendre l\'intro, touche l\'écran au démarrage.'},
+ {k:['vibr'],a:()=>'Le vibreur s\'active ou se coupe dans Réglages → « Vibreur » (non pris en charge sur iPhone).'},
+ {k:['install','telecharger','play store','ecran d accueil','icone','application mobile','apk'],a:()=>'Pour installer Koris sur ton téléphone : ouvre koris-rdc.github.io dans Chrome, touche ⋮ puis « Installer l\'application » (ou « Ajouter à l\'écran d\'accueil »). L\'icône Koris apparaît comme une vraie appli. La version Play Store arrive bientôt.'},
+ {k:['intro','animation','debut','passer l intro'],a:()=>'Au lancement, une courte animation présente Koris. Touche l\'écran une fois pour activer le son, une deuxième fois pour la passer.'},
+ {k:['lent','bug','ne marche pas','probleme','erreur','bloque','plante','ne charge pas'],a:()=>'Désolé pour le souci ! Essaie d\'abord de recharger la page (tire l\'écran vers le bas) et vérifie ta connexion internet. Si le problème continue, écris au service Koris : Réglages → « Aide et contact », en décrivant ce qui se passe.'},
+ {k:['aide','support','service client','contacter koris','whatsapp','joindre'],a:()=>'Pour contacter le service Koris : sur ton profil, touche la roue dentée (Réglages) → « Aide et contact », ou le bouton « ? » en haut d\'un profil. Tu peux écrire par WhatsApp, appeler ou envoyer un e-mail.'},
+ {k:['confidentialite','donnees','securite des donnees','vie privee','rgpd'],a:()=>'Tes données ne sont ni vendues ni utilisées pour de la publicité. Tes messages privés ne sont visibles que par toi et ton interlocuteur. Tous les détails sont dans « Confidentialité », en bas de l\'accueil.'},
+ {k:['regle','interdit','charte','autorise'],a:()=>'Les règles de Koris : être majeur, utiliser ton vrai prénom et une vraie photo, respecter les autres, pas d\'arnaques ni de demandes d\'argent, pas de contenus choquants. Elles sont détaillées dans « À propos » (en haut de l\'accueil).'},
+ /* ---- Sécurité et rencontres ---- */
+ {k:['signaler','faux profil','arnaque','harcel','bloquer','escroc','fake'],a:()=>'Si un membre te dérange, te demande de l\'argent ou semble faux : ne réponds plus et signale-le tout de suite au service Koris (Réglages → « Aide et contact ») avec son nom. Ne t\'inquiète pas, le service agit vite.'},
+ {k:['securite','rendez vous','premier rendez','danger','prudent','confiance'],a:()=>'Pour un premier rendez-vous en sécurité :\n1. Choisis un lieu public (restaurant, terrasse, bord du fleuve fréquenté).\n2. Préviens un proche de l\'endroit et de l\'heure.\n3. Garde ton propre moyen de transport.\n4. N\'envoie jamais d\'argent à un membre que tu ne connais pas.'},
+ {k:['premier message','aborder','que dire','quoi ecrire','commencer une conversation','draguer','seduire'],a:()=>'Pour un bon premier message : salue avec son prénom, parle d\'un détail de son profil ou d\'une de ses photos (« J\'ai vu que tu aimes la musique, tu écoutes quoi en ce moment ? »), et pose une question ouverte. Reste simple, respectueux et sincère 😊'},
+ {k:['beau profil','profil attirant','plus de likes','meilleure photo','bio','a propos de moi'],a:()=>'Pour un profil qui attire : une photo récente où l\'on voit bien ton visage et ton sourire, une belle couverture, et quelques phrases sincères dans « À propos » (ce que tu aimes, ce que tu cherches). Publie aussi de temps en temps dans le fil : ça donne envie de te connaître !'},
+ {k:['personne ne me repond','pas de reponse','ignore','pas de match','seul'],a:()=>'Patience, ça arrive à tout le monde 💗 Soigne ta photo et ton « À propos », publie dans le fil, et écris des premiers messages personnalisés (pas juste « slt »). Indique aussi ta disponibilité sur ton profil : les membres dispo près de toi te verront.'},
+];
+const GK_SUGG=['Comment m\'inscrire ?','Comment payer l\'accès ?','Comment publier une photo ?','Comment écrire à quelqu\'un ?','Conseils pour un premier rendez-vous'];
+function gkAnswer(q){const t=' '+gNorm(q)+' ';let best=null,bs=0;
+  for(const e of GKB){let sc=0;for(const k of e.k){const kk=gNorm(k);if(!kk)continue;if(t.includes(' '+kk)||(kk.length>=5&&t.includes(kk)))sc+=kk.includes(' ')?2.2:1}if(sc>bs){bs=sc;best=e}}
+  if(best&&bs>=1)return best.a();
+  return `Je n'ai pas bien compris ta question 🤔 Essaie de la formuler autrement, par exemple :\n• ${GK_SUGG.slice(0,4).join('\n• ')}\nTu peux aussi contacter le service Koris : Réglages → « Aide et contact ».`}
+/* Gucko « intelligence artificielle » (facultatif) : si la fonction Supabase « gucko » est installée, Gucko répond librement ; sinon il utilise la base ci-dessus. */
+const GK_AI={off:false};
+async function gkAI(msgs){if(GK_AI.off||!S.be?.sb||!S.be?.uid)return null;
+  try{const {data,error}=await S.be.sb.functions.invoke('gucko',{body:{messages:msgs.slice(-10),context:GUIDE_CTX,member:{firstName:me()?.firstName||'',city:me()?.city||'',commune:me()?.commune||''}}});
+    if(error||!data||typeof data.text!=='string'||!data.text.trim()){if(error&&/404|not found|Failed to send/i.test(String(error.message||error)))GK_AI.off=true;return null}
+    return data.text.trim()}catch(_){GK_AI.off=true;return null}}
+
 const G={msgs:[],busy:false,ctl:null};
 async function guideSample(){try{return window.claude?.use?await window.claude.use('sample'):null}catch(_){return null}}
 function gBubble(m){return `<div class="g-b ${m.role==='user'?'me':'ai'}">${m.role==='user'?'':`<span class="g-av">${I.spark}</span>`}<p>${esc(m.content)}</p></div>${m.people?`<div class="k-list">${m.people.map(personCard).join('')}</div>`:''}`}
 function openGuide(){const L=$('#layer');ls.set('guideSeen',true);
   L.innerHTML=`<div class="sheet-bg" id="sbg"><div class="sheet g-sheet" role="dialog" aria-label="Guide Koris"><span class="grab"></span>
-  <div class="g-head"><span class="g-logo">${I.spark}</span><div><b>Gucko, ton assistant</b><small>Trouver quelqu'un de dispo près de toi · aide sur l'app</small></div><button class="icon-btn" id="gX" aria-label="Fermer">${I.x}</button></div>
+  <div class="g-head"><span class="g-logo">${I.spark}</span><div><b>Gucko, ton assistant</b><small>Pose-moi toutes tes questions · trouve qui est dispo près de toi</small></div><button class="icon-btn" id="gX" aria-label="Fermer">${I.x}</button></div>
   <div class="g-list" id="gList"></div>
   <div class="g-chips" id="gChips">${FIND_CHIPS.map((q,i)=>`<button type="button" class="hot" data-gf="${i}">${I.pin.replace('<svg','<svg width="13" height="13"')}${esc(q[0])}</button>`).join('')}${GUIDE_FAQ.map((q,i)=>`<button type="button" data-gq="${i}">${esc(q[0])}</button>`).join('')}</div>
-  <form class="cm-form" id="gForm"><input id="gIn" maxlength="300" placeholder="Ex. Femmes dispo ce soir à Gombe" autocomplete="off" aria-label="Ta question"><button aria-label="Envoyer">${I.send}</button></form>
+  <form class="cm-form" id="gForm"><input id="gIn" maxlength="300" placeholder="Pose ta question à Gucko…" autocomplete="off" aria-label="Ta question"><button aria-label="Envoyer">${I.send}</button></form>
   <p class="hint" id="gNote" style="text-align:center"></p></div></div>`;
   const list=$('#gList');
-  const draw=()=>{list.innerHTML=(G.msgs.length?'':gBubble({role:'assistant',content:`Salut${me()?.firstName?' '+me().firstName:''} ! Je suis Gucko 👋 Je t'aide à trouver des personnes disponibles près de toi, et je t'explique comment utiliser Koris. Écris par exemple « qui est dispo aujourd'hui à Lemba ? »`}))+G.msgs.map(gBubble).join('');list.scrollTop=list.scrollHeight};draw();
+  const draw=()=>{list.innerHTML=(G.msgs.length?'':gBubble({role:'assistant',content:`Salut${me()?.firstName?' '+me().firstName:''} ! Je suis Gucko 👋 Pose-moi toutes tes questions : l'application, le paiement, les messages, la sécurité, des conseils pour un premier message ou un rendez-vous… Je peux aussi te trouver des personnes disponibles près de toi, par exemple « qui est dispo aujourd'hui à Lemba ? »`}))+G.msgs.map(gBubble).join('');list.scrollTop=list.scrollHeight};draw();
   const close=()=>{G.ctl?.abort();L.innerHTML=''};
   $('#sbg').onclick=e=>{if(e.target.id==='sbg')close()};$('#gX').onclick=close;
   const ask=async(q,forced)=>{if(G.busy||!q)return;G.busy=true;G.msgs.push({role:'user',content:q});G.msgs.push({role:'assistant',content:'…'});draw();fx.send();
     const fo=forced||parseFind(q);
     if(fo){await new Promise(r=>setTimeout(r,300));const res=findPeople(fo);const c2=G.msgs[G.msgs.length-1];c2.content=findMsg(fo,res);c2.people=res;draw();G.busy=false;fx.comment();return}
-    const qn=q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');const KW=[/inscri|compte|commencer/,/pay|abonnement|renouvel|argent|prix|combien|mobile money|m-pesa|orange|airtel/,/publi|poster|statut|story|photo|video/,/ecrire|message|discut|parler|contacter un/,/numero|telephone|cacher|masquer/,/certif|badge|@|nom d.utilisateur/];
-    const faq=GUIDE_FAQ.find(x=>x[0]===q)||(()=>{const i=KW.findIndex(r=>r.test(qn));return i>=0&&!window.claude?.use?GUIDE_FAQ[i]:null})();const sample=faq?null:await guideSample();
     const cur=G.msgs[G.msgs.length-1];const paint=()=>{const b=list.lastElementChild?.querySelector('p');if(b)b.textContent=cur.content;list.scrollTop=list.scrollHeight};
-    if(faq){await new Promise(r=>setTimeout(r,350));cur.content=faq[1];paint();G.busy=false;fx.comment();return}
-    if(!sample){const ki=KW.findIndex(r=>r.test(qn));if(ki>=0){cur.content=GUIDE_FAQ[ki][1];paint();G.busy=false;fx.comment();return}cur.content="Je ne peux pas répondre librement ici. Choisis une des questions ci-dessous, ou contacte l'aide avec le bouton « ? » en haut d'un profil.";paint();G.busy=false;return}
-    const hist=G.msgs.slice(0,-1).slice(-8).map(m=>({role:m.role,content:m.content+(m.people?'\n[profils proposés : '+m.people.map(p=>p.x.firstName).join(', ')+']':'')}));
-    hist[0]={role:'user',content:GUIDE_CTX+'\n\nQuestion du membre : '+hist[0].content};if(hist[0].role!=='user')hist.unshift({role:'user',content:GUIDE_CTX});
-    G.ctl=new AbortController();
-    try{const r=await sample(hist,{modelTier:'quick',cache:false,signal:G.ctl.signal,onText:({text})=>{cur.content=text||'…';paint()}});cur.content=r.text||cur.content;paint();fx.comment()}
-    catch(e){if(e?.code!=='cancelled'){cur.content=e?.text||(e?.code==='rate_limited'?'Beaucoup de questions en même temps ! Réessaie dans un instant.':e?.code==='not_granted'?'Le guide n\'a pas été autorisé. Choisis une question ci-dessous, ou contacte l\'aide.':'Je n\'ai pas pu répondre. Réessaie ou choisis une question ci-dessous.');paint()}}
+    try{const hist=G.msgs.slice(0,-1).slice(-10).map(m=>({role:m.role,content:m.content+(m.people?'\n[profils proposés : '+m.people.map(p=>p.x.firstName).join(', ')+']':'')}));
+      const ai=await gkAI(hist);
+      if(ai){cur.content=ai}else{await new Promise(r=>setTimeout(r,450));cur.content=gkAnswer(q)}
+      paint();fx.comment()}
+    catch(_){cur.content=gkAnswer(q);paint()}
     finally{G.busy=false;G.ctl=null}};
   $('#gChips').onclick=e=>{const f=e.target.closest('[data-gf]');if(f){e.stopPropagation();const c=FIND_CHIPS[+f.dataset.gf];return ask(c[0],c[1])}const b=e.target.closest('[data-gq]');if(!b)return;e.stopPropagation();ask(GUIDE_FAQ[+b.dataset.gq][0])};
   list.addEventListener('click',e=>{if(e.target.closest('[data-profile],[data-chat]'))setTimeout(()=>{$('#layer').innerHTML=''},0)});
