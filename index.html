@@ -1184,7 +1184,7 @@ function vAuth(){const mode=S.authMode||'up';
    <button class="btn btn-primary" id="aGo" type="submit">${mode==='up'?'Créer mon compte':mode==='in'?'Me connecter':'Recevoir le lien'}</button>
   </form>
   ${mode==='in'?`<button type="button" class="lnk-in" data-auth="reset">Mot de passe oublié ?</button>`:mode==='reset'?`<button type="button" class="lnk-in" data-auth="in">Retour à la connexion</button>`:''}
-  <p class="fine">18 ans et plus · Inscription 5&nbsp;000&nbsp;FC, puis 5&nbsp;000&nbsp;FC/mois · <a href="/confidentialite.html" style="color:inherit;text-decoration:underline">Confidentialité</a></p></section>`}
+  <p class="fine">18 ans et plus · ${PRICE_LINE} · <a href="/confidentialite.html" style="color:inherit;text-decoration:underline">Confidentialité</a></p></section>`}
 function authErr(e){const m=String(e?.message||e||'');
   if(/invalid login|invalid credentials/i.test(m))return 'E-mail ou mot de passe incorrect.';
   if(/already registered|already exists/i.test(m))return 'Cet e-mail a déjà un compte : touche « J\'ai un compte ».';
@@ -1237,7 +1237,7 @@ function makeDemoBackend(){
     onMsgs(cid,f){(subs.m[cid]=subs.m[cid]||[]);return on(subs.m[cid],f,()=>emitM(cid))},
     async saveProfile(p){L.p=L.p.filter(x=>x.id!==uid);L.p.push({...p,id:uid});emitP();
       if(p.cert?.status==='pending')setTimeout(()=>{const q=L.p.find(x=>x.id===uid);if(q&&q.cert?.status==='pending'){q.certified=true;q.handle=q.cert.handle;q.cert={...q.cert,status:'ok'};emitP()}},3500);
-      if(p.pay?.status==='pending'&&!p.paid)setTimeout(()=>{const q=L.p.find(x=>x.id===uid);if(q&&q.pay?.status==='pending'){q.paid=true;q.regPaid=true;q.paidAt=Date.now();q.paidUntil=Math.max(Date.now(),q.paidUntil||0)+MONTH;q.pay={...q.pay,status:'ok'};emitP()}},3500)},
+      if(p.pay?.status==='pending'&&!p.paid)setTimeout(()=>{const q=L.p.find(x=>x.id===uid);if(q&&q.pay?.status==='pending'){q.paid=true;q.regPaid=true;q.paidAt=Date.now();q.paidUntil=SUBSCRIPTION?Math.max(Date.now(),q.paidUntil||0)+MONTH:null;q.pay={...q.pay,status:'ok'};emitP()}},3500)},
     async updateProfileOf(id,data){const q=L.p.find(x=>x.id===id);if(q){Object.assign(q,data);emitP()}},
     onPayCfg(cb){L.cfgSubs=(L.cfgSubs||[]);L.cfgSubs.push(cb);setTimeout(()=>cb(L.cfg||{orange:{num:'+243 89 000 0000',holder:'Koris (démo)'},airtel:{num:'+243 99 000 0000',holder:'Koris (démo)'},mpesa:{num:'+243 81 000 0000',holder:'Koris (démo)'}}),0);return()=>{}},
     async savePayCfg(c){L.cfg=c;(L.cfgSubs||[]).forEach(f=>f(c))},
@@ -1349,7 +1349,7 @@ function vOnboard(){
   <div class="wl-dots" id="wlD">${slides.map((_,i)=>`<button data-slide="${i}" class="${i?'':'on'}" aria-label="Diapositive ${i+1}"></button>`).join('')}</div>
   <button class="wl-go" data-go="signup" ${signed?'data-param="fresh"':''}>Commencer</button>
   ${signed?`<button class="lnk-in" data-go="${isActive(me())?'feed':'pay'}">J'ai déjà un compte · <b>Entrer</b></button>`:S.be.mode==='live'?`<button class="lnk-in" data-go="auth" data-param="in">J'ai déjà un compte · <b>Me connecter</b></button>`:''}
-  <p class="fine">18 ans et plus · Inscription 5&nbsp;000&nbsp;FC, puis 5&nbsp;000&nbsp;FC/mois · <a href="/confidentialite.html" style="color:inherit;text-decoration:underline">Confidentialité</a></p>
+  <p class="fine">18 ans et plus · ${PRICE_LINE} · <a href="/confidentialite.html" style="color:inherit;text-decoration:underline">Confidentialité</a></p>
   ${demoBanner()}
   </section>`}
 function initWelcome(){const sc=$('#wlS'),dots=[...document.querySelectorAll('#wlD button')];if(!sc)return null;let idx=0,user=false;
@@ -1367,7 +1367,7 @@ function vAbout(){
   <div class="top" style="padding-inline:0"><button class="icon-btn" data-back aria-label="Retour">${I.back}</button><div class="wordmark"><i></i>KORIS</div><span style="width:42px"></span></div>
   <div class="glow ab-hero"><h1>Des rencontres <span>vraies</span>, près de chez toi.</h1>
    <p>Koris est une application de rencontre pensée pour la RD Congo. Ici, chaque membre a un vrai profil, avec son prénom, sa ville et ses photos. L'idée est simple : te montrer des personnes sincères autour de toi, à Kinshasa, Lubumbashi, Goma ou ailleurs, et te laisser faire le premier pas à ton rythme.</p>
-   <p>Pas de faux profils en masse ni de défilement sans fin : un petit abonnement mensuel filtre les curieux et garde une communauté de personnes qui cherchent vraiment à rencontrer quelqu'un, que ce soit une amitié, une belle histoire ou plus.</p></div>
+   <p>Pas de faux profils en masse ni de défilement sans fin : ${SUBSCRIPTION?'un petit abonnement mensuel':'un petit droit d\'accès'} filtre les curieux et garde une communauté de personnes qui cherchent vraiment à rencontrer quelqu'un, que ce soit une amitié, une belle histoire ou plus.</p></div>
 
   <div class="ab-sec"><h2>Comment c'est organisé</h2><p>L'application tient en cinq espaces, accessibles depuis la barre en bas de l'écran.</p>
    <div class="ab-tabs">
@@ -1379,7 +1379,7 @@ function vAbout(){
    </div></div>
 
   <div class="ab-sec"><h2>Pour commencer</h2>
-   <ol class="steps"><li>Crée ton profil avec ton vrai prénom, ta ville et une photo où l'on voit bien ton visage.</li><li>Paie l'inscription de 5&nbsp;000&nbsp;FC et le premier mois d'abonnement (5&nbsp;000&nbsp;FC) par Mobile Money, puis 5&nbsp;000&nbsp;FC chaque mois.</li><li>Publie une première photo ou un petit message pour te présenter.</li><li>Parcours les profils, envoie un message, et prends le temps de discuter avant de te rencontrer.</li></ol></div>
+   <ol class="steps"><li>Crée ton profil avec ton vrai prénom, ta ville et une photo où l'on voit bien ton visage.</li><li>${SUBSCRIPTION?'Paie l\'inscription de 5&nbsp;000&nbsp;FC et le premier mois d\'abonnement (5&nbsp;000&nbsp;FC) par Mobile Money, puis 5&nbsp;000&nbsp;FC chaque mois.':'Paie l\'accès de 5&nbsp;000&nbsp;FC par Mobile Money, une seule fois.'}</li><li>Publie une première photo ou un petit message pour te présenter.</li><li>Parcours les profils, envoie un message, et prends le temps de discuter avant de te rencontrer.</li></ol></div>
 
   <div class="ab-sec"><h2>Exigences pour utiliser Koris</h2><p>En t'inscrivant, tu acceptes ces règles. Elles protègent tout le monde.</p>
    <ul class="rules">
@@ -1433,11 +1433,15 @@ const cities=['Kinshasa','Lubumbashi','Goma','Bukavu','Kisangani','Mbuji-Mayi','
 
 /* Mobile Money : l'argent part directement du téléphone du membre vers les numéros du propriétaire (réglés dans l'espace Paiements). */
 const OPS=[{id:'orange',name:'Orange Money',short:'OM',c:'#FF7900',ussd:'*144#'},{id:'airtel',name:'Airtel Money',short:'AM',c:'#ED1C24',ussd:'*501#'},{id:'mpesa',name:'M-Pesa',short:'M',c:'#E31B23',ussd:'*1222#'}];
+/* ABONNEMENT : désactivé pour l'instant. Pour le remettre (5 000 FC d'inscription + 5 000 FC/mois),
+   passer SUBSCRIPTION à true : tous les écrans, textes et l'aide reprennent l'abonnement mensuel. */
+const SUBSCRIPTION=false,ACCESS_FEE=5000;
 const FEE=5000,REG=5000,MONTH=30*864e5;
+const PRICE_LINE=SUBSCRIPTION?'Inscription 5&nbsp;000&nbsp;FC, puis 5&nbsp;000&nbsp;FC/mois':'Accès 5&nbsp;000&nbsp;FC, une seule fois';
 const isNew=p=>!(p?.regPaid||p?.paid);
-const dueFor=p=>isNew(p)?REG+FEE:FEE;
+const dueFor=p=>SUBSCRIPTION?(isNew(p)?REG+FEE:FEE):ACCESS_FEE;
 const fc=n=>n.toLocaleString('fr-FR').replace(/\u202f|\u00a0/g,' ')+' FC';
-const isActive=p=>!!p&&!!p.paid&&(!!p.owner||!p.paidUntil||p.paidUntil>Date.now());
+const isActive=p=>!!p&&!!p.paid&&(!SUBSCRIPTION||!!p.owner||!p.paidUntil||p.paidUntil>Date.now());
 const untilTxt=t=>new Date(t).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
 const opById=id=>OPS.find(o=>o.id===id)||OPS[0];
 function payCfg(id){const c=(S.payCfg||{})[id]||{};const o=opById(id);return{num:String(c.num||'').trim(),holder:String(c.holder||'').trim(),ussd:String(c.ussd||o.ussd).trim()}}
@@ -1447,18 +1451,18 @@ function destHtml(id){const o=opById(id),c=payCfg(id);
   return `<div class="dest"><div class="mid"><small>${esc(o.name)}${c.holder?' · '+esc(c.holder):''}</small><b>${esc(c.num)}</b></div><button type="button" class="mini" data-copy="${esc(c.num)}">Copier</button></div>
    <a class="mini solid" href="${tel}" target="_top" style="align-self:flex-start">${I.phone}Ouvrir ${esc(o.name)} (${esc(c.ussd)})</a>`}
 function vPay(){const p=me()||{};const pay=p.pay||{};const op=S.payOp||pay.op||'orange';
-  const prev=isActive(p);const head=`${prev?`<div class="banner" style="margin:12px 0 0">${p.owner?'Aperçu : c\'est la page que voient les nouveaux membres. Ton compte propriétaire est toujours actif.':'Ton abonnement est actif'+(p.paidUntil?' jusqu\'au '+untilTxt(p.paidUntil):'')+'. Tu peux déjà payer le mois suivant.'}</div>`:''}<div class="top" style="padding-inline:0"><button class="icon-btn" data-go="${prev?'admin':'signup'}" aria-label="Retour">${I.back}</button><span></span>${S.owner?`<button class="icon-btn" data-go="admin" aria-label="Espace paiements">${I.wallet}</button>`:''}</div>`;
-  const due=dueFor(p);const amount=`<div class="glow amt-card"><div><span class="hint">${isNew(p)?'Inscription + 1er mois':'Abonnement · 1 mois'}</span><div class="amt">${fc(due).replace(' FC','')}<small>FC</small></div></div><span class="tag">${isNew(p)?'puis 5 000 FC / mois':'30 jours'}</span></div>
+  const prev=isActive(p);const head=`${prev?`<div class="banner" style="margin:12px 0 0">${p.owner?'Aperçu : c\'est la page que voient les nouveaux membres. Ton compte propriétaire est toujours actif.':(SUBSCRIPTION?'Ton abonnement est actif'+(p.paidUntil?' jusqu\'au '+untilTxt(p.paidUntil):'')+'. Tu peux déjà payer le mois suivant.':'Ton accès à Koris est actif.')}</div>`:''}<div class="top" style="padding-inline:0"><button class="icon-btn" data-go="${prev?'admin':'signup'}" aria-label="Retour">${I.back}</button><span></span>${S.owner?`<button class="icon-btn" data-go="admin" aria-label="Espace paiements">${I.wallet}</button>`:''}</div>`;
+  const due=dueFor(p);const amount=!SUBSCRIPTION?`<div class="glow amt-card"><div><span class="hint">Accès à Koris</span><div class="amt">${fc(due).replace(' FC','')}<small>FC</small></div></div><span class="tag">une seule fois</span></div>`:`<div class="glow amt-card"><div><span class="hint">${isNew(p)?'Inscription + 1er mois':'Abonnement · 1 mois'}</span><div class="amt">${fc(due).replace(' FC','')}<small>FC</small></div></div><span class="tag">${isNew(p)?'puis 5 000 FC / mois':'30 jours'}</span></div>
    ${isNew(p)?`<div class="fee-lines"><div><span>Frais d'inscription (une seule fois)</span><b>5 000 FC</b></div><div><span>Abonnement du 1er mois</span><b>5 000 FC</b></div><div class="tot"><span>Total à payer</span><b>${fc(due)}</b></div></div>`:''}`;
   if(pay.status==='pending'&&!S.route.repay){const o=opById(pay.op);
     return `<section class="form pay">${head}<h1>Paiement envoyé</h1><p class="lead">Étape 2 sur 2 · Vérification en cours.</p>${amount}
-    <div class="glow wait"><div class="spin"></div><b>On vérifie ton paiement</b><p>Dès que les ${fc(pay.amount||FEE)} sont confirmés, ton accès s'ouvre tout seul pour 30 jours.</p>
-     <dl><dt>Montant</dt><dd>${fc(pay.amount||FEE)} · ${pay.kind==='inscription'?'inscription + 1er mois':'renouvellement'}</dd><dt>Moyen</dt><dd>${esc(o.name)}</dd><dt>Depuis</dt><dd>${esc(pay.from)}</dd><dt>Référence</dt><dd>${esc(pay.ref)}</dd><dt>Envoyé</dt><dd>${ago(pay.at)}</dd></dl></div>
+    <div class="glow wait"><div class="spin"></div><b>On vérifie ton paiement</b><p>Dès que les ${fc(pay.amount||FEE)} sont confirmés, ton accès s'ouvre tout seul${SUBSCRIPTION?' pour 30 jours':''}.</p>
+     <dl><dt>Montant</dt><dd>${fc(pay.amount||FEE)} · ${pay.kind==='acces'?'accès à Koris':pay.kind==='inscription'?'inscription + 1er mois':'renouvellement'}</dd><dt>Moyen</dt><dd>${esc(o.name)}</dd><dt>Depuis</dt><dd>${esc(pay.from)}</dd><dt>Référence</dt><dd>${esc(pay.ref)}</dd><dt>Envoyé</dt><dd>${ago(pay.at)}</dd></dl></div>
     <button class="btn btn-ghost" data-repay="1" style="flex:none;height:50px">Corriger les infos du paiement</button>
     <p class="alt">Ça prend trop de temps ? <button type="button" data-act="help">Contacter l'aide</button></p>
     ${S.owner?`<button class="btn btn-ghost" data-ownok="1" style="flex:none;height:50px">Activer mon compte (propriétaire)</button>`:''}</section>`}
   return `<form class="form pay" id="fPay" novalidate>${head}
-  <h1>${p.paid?(isActive(p)?'Payer le mois suivant':'Renouvelle ton abonnement'):'Abonnement'}</h1><p class="lead">${p.paid?(isActive(p)?'5 000 FC ajoutent 30 jours à ton abonnement en cours.':'Ton mois est terminé. Renouvelle pour continuer à discuter.'):'Étape 2 sur 2 · Inscription 5 000 FC, puis 5 000 FC par mois.'}</p>
+  <h1>${!SUBSCRIPTION?'Accès à Koris':p.paid?(isActive(p)?'Payer le mois suivant':'Renouvelle ton abonnement'):'Abonnement'}</h1><p class="lead">${!SUBSCRIPTION?'Étape 2 sur 2 · 5 000 FC, une seule fois, pour accéder à Koris.':p.paid?(isActive(p)?'5 000 FC ajoutent 30 jours à ton abonnement en cours.':'Ton mois est terminé. Renouvelle pour continuer à discuter.'):'Étape 2 sur 2 · Inscription 5 000 FC, puis 5 000 FC par mois.'}</p>
   ${pay.status==='rejected'?`<div class="warn">Ton dernier paiement n'a pas pu être confirmé. Vérifie la référence du SMS et renvoie-la.</div>`:''}
   ${amount}
   <div class="mm" role="radiogroup" aria-label="Moyen de paiement">${OPS.map(o=>`<button type="button" role="radio" aria-checked="${o.id===op}" data-mm="${o.id}" class="${o.id===op?'on':''}" style="--c:${o.c}"><span class="lg" style="background:${o.c}">${o.short}</span>${o.name}</button>`).join('')}</div>
@@ -1508,7 +1512,7 @@ document.addEventListener('input',e=>{if(e.target.id==='certHandle')checkHandle(
 function vAdmin(){
   return `<section class="adm">
   <div class="top" style="padding-inline:0"><button class="icon-btn" data-go="me" aria-label="Retour">${I.back}</button><h1 style="font-size:22px;flex:1;text-align:center">Paiements</h1><span style="width:42px"></span></div>
-  <p class="lead" style="color:var(--muted)">Visible seulement par toi. Les membres paient 5 000 FC d'inscription + 5 000 FC par mois à tes numéros, puis tu confirmes ici quand l'argent est bien arrivé.</p>
+  <p class="lead" style="color:var(--muted)">Visible seulement par toi. Les membres paient ${SUBSCRIPTION?'5 000 FC d\'inscription + 5 000 FC par mois':'5 000 FC une seule fois'} à tes numéros, puis tu confirmes ici quand l'argent est bien arrivé.</p>
   <button class="btn btn-ghost" data-go="pay" data-param="preview" style="width:100%;flex:none;height:48px;margin-top:14px">${I.wallet}Voir la page de paiement</button>
   <h2>À vérifier</h2><div id="admList">${admListHtml()}</div>
   <h2>Certifications à vérifier (5 $)</h2><div id="admCert">${admCertHtml()}</div>
@@ -1530,7 +1534,7 @@ function vAdmin(){
 function admListHtml(){const l=Object.entries(S.profiles).filter(([,x])=>x.pay?.status==='pending').sort((a,b)=>(b[1].pay.at||0)-(a[1].pay.at||0));
   if(!l.length)return `<p class="hint" style="padding:6px 2px 4px">Aucun paiement en attente.</p>`;
   return l.map(([id,x])=>{const pay=x.pay,o=opById(pay.op);return `<div class="prow"><div class="hd">${av(x,44)}<div><b>${esc(fullName(x))}</b><small>${esc([x.city,x.phone].filter(Boolean).join(' · '))}</small></div><small>${ago(pay.at)}</small></div>
-   <dl><dt>Montant</dt><dd>${fc(pay.amount||FEE)} · ${pay.kind==='inscription'?'inscription + 1er mois':'renouvellement'}</dd><dt>Moyen</dt><dd>${esc(o.name)}</dd><dt>Depuis</dt><dd>${esc(pay.from)}</dd><dt>Référence</dt><dd>${esc(pay.ref)}</dd></dl>
+   <dl><dt>Montant</dt><dd>${fc(pay.amount||FEE)} · ${pay.kind==='acces'?'accès à Koris':pay.kind==='inscription'?'inscription + 1er mois':'renouvellement'}</dd><dt>Moyen</dt><dd>${esc(o.name)}</dd><dt>Depuis</dt><dd>${esc(pay.from)}</dd><dt>Référence</dt><dd>${esc(pay.ref)}</dd></dl>
    <div class="acts"><button class="btn btn-ghost" data-payno="${esc(id)}">Refuser</button><button class="btn btn-primary" data-payok="${esc(id)}">${I.check}Valider</button></div></div>`}).join('')}
 function admCertHtml(){const l=Object.entries(S.profiles).filter(([,x])=>x.cert?.status==='pending').sort((a,b)=>(b[1].cert.at||0)-(a[1].cert.at||0));
   if(!l.length)return `<p class="hint" style="padding:6px 2px 4px">Aucune demande de certification.</p>`;
@@ -1540,7 +1544,7 @@ function admCertHtml(){const l=Object.entries(S.profiles).filter(([,x])=>x.cert?
    <dl><dt>Montant</dt><dd>5 $</dd><dt>Moyen</dt><dd>${esc(o.name)}</dd><dt>Depuis</dt><dd>${esc(c.from)}</dd><dt>Référence</dt><dd>${esc(c.ref)}</dd></dl>
    <div class="acts"><button class="btn btn-ghost" data-certno="${esc(id)}">Refuser</button><button class="btn btn-primary" data-certok="${esc(id)}" ${clash?'disabled':''}>${I.check}Certifier</button></div></div>`}).join('')}
 function admDoneHtml(){const l=Object.values(S.profiles).filter(x=>x.paid&&!x.owner&&x.pay?.status==='ok').sort((a,b)=>(b.paidAt||0)-(a.paidAt||0)).slice(0,30);
-  return l.length?`<p class="hint" style="padding:0 2px 8px">${l.length} membre${l.length>1?'s':''} · ${l.filter(isActive).length} abonnement${l.filter(isActive).length>1?'s':''} actif${l.filter(isActive).length>1?'s':''}</p>`+l.map(x=>`<div class="call" style="padding:6px 0">${av(x,36)}<div class="mid"><b>${esc(fullName(x))}</b><small>${esc(opById(x.pay.op).name)} · réf. ${esc(x.pay.ref)}${x.paidUntil?` · ${isActive(x)?'jusqu\'au':'expiré le'} ${untilTxt(x.paidUntil)}`:''}</small></div></div>`).join(''):`<p class="hint" style="padding:0 2px">Rien pour l'instant.</p>`}
+  return l.length?`<p class="hint" style="padding:0 2px 8px">${l.length} membre${l.length>1?'s':''} · ${l.filter(isActive).length} ${SUBSCRIPTION?'abonnement':'accès'}${SUBSCRIPTION&&l.filter(isActive).length>1?'s':''} actif${l.filter(isActive).length>1?'s':''}</p>`+l.map(x=>`<div class="call" style="padding:6px 0">${av(x,36)}<div class="mid"><b>${esc(fullName(x))}</b><small>${esc(opById(x.pay.op).name)} · réf. ${esc(x.pay.ref)}${x.paidUntil?` · ${isActive(x)?'jusqu\'au':'expiré le'} ${untilTxt(x.paidUntil)}`:''}</small></div></div>`).join(''):`<p class="hint" style="padding:0 2px">Rien pour l'instant.</p>`}
 
 function vFeed(){const p=me();const others=Object.entries(S.profiles).filter(([id,x])=>id!==S.be.uid&&x.paid).sort((a,b)=>(b[1].at||0)-(a[1].at||0)).slice(0,12);
   const today=S.posts.filter(x=>Date.now()-x.at<86400e3).length;
@@ -1639,7 +1643,7 @@ function vProfile(id,self){const x=S.profiles[id];if(!x)return `<div class="empt
     ${self?`<div class="info-row"><span class="ic">${I.phone}</span><div><small>Téléphone · ${x.phoneHidden?'masqué pour les membres':'visible par les membres'}</small><b>${esc(x.phone||'—')}</b></div><label class="tg" title="Afficher mon numéro aux membres"><input type="checkbox" id="phoneVis" ${x.phoneHidden?'':'checked'} aria-label="Afficher mon numéro aux autres membres"></label></div>`
       :phoneOk(x,id)?row('phone','Téléphone',x.phone,`<button class="copy" data-copy="${esc(x.phone)}">Copier</button>`):x.phone?`<div class="info-row"><span class="ic">${I.phone}</span><div><small>Téléphone</small><b style="color:var(--muted);font-weight:500">Numéro masqué par le membre</b></div></div>`:''}
     ${row('city','Ville',x.city)}${row('globe','Pays',x.country)}${row('sex','Sexe',x.sex==='F'?'Femme':x.sex==='H'?'Homme':'')}${row('cake','Âge',x.age?x.age+' ans':'')}
-    ${self&&!x.owner&&x.paid?`<div class="sub-row ${isActive(x)?'':'off'}"><span class="dot"></span><span class="t">Abonnement ${isActive(x)?'actif':'expiré'}${x.paidUntil?` · ${isActive(x)?'jusqu\'au':'depuis le'} ${untilTxt(x.paidUntil)}`:''}</span><button data-go="pay" data-param="preview">Renouveler</button></div>`:''}</div>
+    ${SUBSCRIPTION&&self&&!x.owner&&x.paid?`<div class="sub-row ${isActive(x)?'':'off'}"><span class="dot"></span><span class="t">Abonnement ${isActive(x)?'actif':'expiré'}${x.paidUntil?` · ${isActive(x)?'jusqu\'au':'depuis le'} ${untilTxt(x.paidUntil)}`:''}</span><button data-go="pay" data-param="preview">Renouveler</button></div>`:''}</div>
    <h3 class="pf-h">Publications <span>${own.length}</span></h3>
    <div class="feed pf-posts">${own.length?own.map(postHtml).join(''):`<div class="pf-empty">${I.image}<span>${self?'Tu n\'as encore rien publié.':'Aucune publication pour l\'instant.'}</span>${self?`<button class="btn btn-primary" data-act="compose" style="flex:none;height:44px;padding:0 20px">${I.plus}Publier</button>`:''}</div>`}</div>
    <div style="width:100%;margin-top:12px">${self?demoBanner():''}</div>
@@ -1850,7 +1854,7 @@ const GUIDE_CTX=`Tu es « Gucko », le guide de l'application de rencontre Koris
 Ce que fait l'application :
 - Accueil : bouton « Commencer » pour s'inscrire, lien « J'ai déjà un compte ».
 - Inscription : photo, prénom, nom, sexe, âge (18 ans minimum), métier, téléphone, ville, pays, « À propos de toi », case à cocher pour accepter les règles.
-- Prix : inscription 5 000 FC (une seule fois) + abonnement 5 000 FC par mois, soit 10 000 FC au premier paiement puis 5 000 FC à chaque renouvellement, par Orange Money, Airtel Money ou M-Pesa. On envoie l'argent au numéro affiché (bouton « Copier » et bouton qui ouvre le menu Mobile Money), puis on entre le numéro qui a payé et la référence du SMS. Le service vérifie puis l'accès s'ouvre pour 30 jours. On renouvelle depuis son profil (carte « Abonnement »).
+- Prix : ${SUBSCRIPTION?"inscription 5 000 FC (une seule fois) + abonnement 5 000 FC par mois, soit 10 000 FC au premier paiement puis 5 000 FC à chaque renouvellement":"accès 5 000 FC, payé une seule fois (pas d'abonnement mensuel pour le moment)"}, par Orange Money, Airtel Money ou M-Pesa. On envoie l'argent au numéro affiché (bouton « Copier » et bouton qui ouvre le menu Mobile Money), puis on entre le numéro qui a payé et la référence du SMS. Le service vérifie puis l'accès s'ouvre${SUBSCRIPTION?" pour 30 jours. On renouvelle depuis son profil (carte « Abonnement »).":"."}
 - Fil (icône maison) : publications des membres, J'aime, commentaires, partage. Le bouton « + » au centre en bas sert à publier une photo, une vidéo (8 Mo max, environ 30 s) ou un texte.
 - Découvrir (boussole) : chercher des membres par nom ou par ville.
 - Messages (bulle) : stories en haut (« Ta story » pour publier), onglets Discussions et Appels qu'on fait glisser. Appels : l'appel passe par le téléphone, si le membre affiche son numéro.
@@ -1860,8 +1864,8 @@ Ce que fait l'application :
 - Disponibilité : sur son profil, « Ma disponibilité » (Aujourd'hui, Ce week-end, Pas dispo) et « Ma zone » (commune ou position approximative). Pour trouver quelqu'un de dispo près de soi, il suffit de demander à Gucko (ex. « qui est dispo aujourd'hui près de moi ? ») : Gucko affiche les profils avec la distance, un bouton carte et un bouton pour écrire.
 - Sécurité : premier rendez-vous dans un lieu public, prévenir un proche, ne jamais envoyer d'argent à un membre. Les règles sont dans « À propos ».`;
 const FIND_CHIPS=[['Qui est dispo aujourd\'hui près de moi ?',{when:'today'}],['Dispo ce week-end',{when:'weekend'}],['Femmes dispo près de moi',{when:'any',sex:'F'}],['Hommes dispo près de moi',{when:'any',sex:'H'}]];
-const GUIDE_FAQ=[['Comment m\'inscrire ?','1. Sur l\'accueil, touche « Commencer ».\n2. Ajoute ta photo et remplis tes infos (18 ans minimum).\n3. Coche les règles et touche « S\'inscrire ».\n4. Paie 10 000 FC par Mobile Money : 5 000 FC d\'inscription + 5 000 FC pour le premier mois.'],
- ['Comment payer l\'abonnement ?','1. Choisis Orange Money, Airtel Money ou M-Pesa.\n2. Envoie le montant affiché au numéro indiqué (bouton « Copier ») : 10 000 FC la première fois (inscription + 1er mois), puis 5 000 FC par mois.\n3. Entre le numéro qui a payé et la référence du SMS, puis « J\'ai payé ».\nTon accès s\'ouvre pour 30 jours dès la vérification.'],
+const GUIDE_FAQ=[['Comment m\'inscrire ?','1. Sur l\'accueil, touche « Commencer ».\n2. Ajoute ta photo et remplis tes infos (18 ans minimum).\n3. Coche les règles et touche « S\'inscrire ».\n'+(SUBSCRIPTION?'4. Paie 10 000 FC par Mobile Money : 5 000 FC d\'inscription + 5 000 FC pour le premier mois.':'4. Paie 5 000 FC par Mobile Money, une seule fois, pour accéder à Koris.')],
+ SUBSCRIPTION?['Comment payer l\'abonnement ?','1. Choisis Orange Money, Airtel Money ou M-Pesa.\n2. Envoie le montant affiché au numéro indiqué (bouton « Copier ») : 10 000 FC la première fois (inscription + 1er mois), puis 5 000 FC par mois.\n3. Entre le numéro qui a payé et la référence du SMS, puis « J\'ai payé ».\nTon accès s\'ouvre pour 30 jours dès la vérification.']:['Comment payer l\'accès ?','1. Choisis Orange Money, Airtel Money ou M-Pesa.\n2. Envoie 5 000 FC au numéro indiqué (bouton « Copier »). On paie une seule fois.\n3. Entre le numéro qui a payé et la référence du SMS, puis « J\'ai payé ».\nTon accès s\'ouvre dès la vérification.'],
  ['Comment publier une photo ?','Touche le gros bouton « + » en bas au centre, choisis une photo ou une vidéo, écris un petit message, puis « Publier ». Pour une story, utilise « Ta story » dans Messages.'],
  ['Comment écrire à quelqu\'un ?','Ouvre son profil (depuis le fil ou Découvrir), puis touche « Écrire ». Tes discussions sont dans l\'onglet Messages.'],
  ['Comment cacher mon numéro ?','Va sur ton profil, ligne « Téléphone », et éteins l\'interrupteur. Les autres membres verront « Numéro masqué ».'],
@@ -1966,7 +1970,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button,[da
   if(d.deltest){if(!S.owner)return;if(!t.dataset.armed){t.dataset.armed='1';t.textContent='Confirmer la suppression ?';setTimeout(()=>{delete t.dataset.armed;t.textContent='Supprimer tous les profils fictifs'},4000);return}
     t.disabled=true;const ids=Object.entries(S.profiles).filter(([,x])=>x.test).map(([id])=>id);let n=0;for(const id of ids){try{for(const p of S.posts.filter(p=>p.uid===id))await S.be.deletePost(p.id).catch(()=>{});await S.be.deleteProfileOf(id);n++}catch(_){}}toast(n+' profils fictifs supprimés');return}
   if(d.payok||d.payno){const id=d.payok||d.payno,x=S.profiles[id];if(!x||!S.owner)return;t.disabled=true;
-    try{if(d.payok)await S.be.updateProfileOf(id,{paid:true,regPaid:true,paidAt:Date.now(),paidUntil:Math.max(Date.now(),x.paidUntil||0)+MONTH,pay:{...x.pay,status:'ok',checkedAt:Date.now()}});else await S.be.updateProfileOf(id,{pay:{...x.pay,status:'rejected',checkedAt:Date.now()}});toast(d.payok?'Paiement validé · accès ouvert':'Paiement refusé')}catch(_){t.disabled=false;toast("L'action n'a pas abouti. Réessaie.")}return}
+    try{if(d.payok)await S.be.updateProfileOf(id,{paid:true,regPaid:true,paidAt:Date.now(),paidUntil:SUBSCRIPTION?Math.max(Date.now(),x.paidUntil||0)+MONTH:null,pay:{...x.pay,status:'ok',checkedAt:Date.now()}});else await S.be.updateProfileOf(id,{pay:{...x.pay,status:'rejected',checkedAt:Date.now()}});toast(d.payok?'Paiement validé · accès ouvert':'Paiement refusé')}catch(_){t.disabled=false;toast("L'action n'a pas abouti. Réessaie.")}return}
   if(t.id==='certBtn'){e.preventDefault();const err=$('#certErr');const h=$('#certHandle').value.trim().toLowerCase().replace(/^@/,'');
     if(!checkHandle()){err.textContent=h?'Choisis un nom d\'utilisateur libre et valide.':'Choisis ton nom d\'utilisateur.';$('#certHandle').focus();return}
     const op=S.payOp||me()?.cert?.op||'orange',c=payCfg(op);if(!c.num){err.textContent="Ce moyen de paiement n'est pas encore disponible. Choisis-en un autre.";return}
@@ -1982,7 +1986,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button,[da
     if(from.replace(/\D/g,'').length<9){err.textContent='Entre le numéro qui a envoyé l\'argent (ex. +243 81 234 5678).';$('#payFrom').focus();return}
     if(ref.length<4){err.textContent='Entre la référence de la transaction reçue par SMS.';$('#payRef').focus();return}
     t.disabled=true;t.textContent='Envoi…';
-    try{const p=me();await S.be.saveProfile({...p,pay:{op,from,ref:ref.slice(0,80),to:c.num,amount:dueFor(me()),kind:isNew(me())?'inscription':'renouvellement',at:Date.now(),status:'pending'}});S.route.repay=false;S.lastPaySt='pending';render()}
+    try{const p=me();await S.be.saveProfile({...p,pay:{op,from,ref:ref.slice(0,80),to:c.num,amount:dueFor(me()),kind:!SUBSCRIPTION?'acces':isNew(me())?'inscription':'renouvellement',at:Date.now(),status:'pending'}});S.route.repay=false;S.lastPaySt='pending';render()}
     catch(_){t.disabled=false;t.textContent="J'ai payé · Envoyer";err.textContent="L'envoi a échoué. Vérifie ta connexion et réessaie."}}
 });
 document.addEventListener('ended',()=>{if(softRender.later)softRender()},true);
